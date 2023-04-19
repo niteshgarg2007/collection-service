@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %t %level %c %5p %X{traceId} %X{spanId} %X{IpAddress} %X{RequestURI} %X{userId} - %msg %n" />
+		</Console>
+		<File name="File" fileName="C:/VUISFiles/ITS/Collection/CollectionService.log">
+			<!-- <param name="MaxFileSize" value="200000KB"/>
+			<param name="MaxBackupIndex" value="5"/> -->
+			<PatternLayout pattern="%d %t %level %c %X{traceId} %X{spanId} %X{IpAddress} %X{RequestURI} %X{userId} - %msg %n" />
+		</File>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="File" />
+		</Root>
+	</Loggers>
+</Configuration>
