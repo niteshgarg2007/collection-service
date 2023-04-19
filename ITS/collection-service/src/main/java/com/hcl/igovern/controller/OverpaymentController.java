@@ -25,6 +25,8 @@ import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.OverpaidWeeksVO;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("/its/apis/overpayment")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -36,6 +38,7 @@ public class OverpaymentController {
 	@Autowired
 	private OverpaymentService overpaymentService;
 
+	@Operation(summary = "Save overpayment and its related data to database.")
 	@PostMapping("/addoverpayment")
 	public ResponseEntity<?> addOverpayment(
 				@RequestBody ItsOverpaymentVO itsOverpaymentVO) {
@@ -53,6 +56,7 @@ public class OverpaymentController {
 		return retVal;
 	}
 	
+	@Operation(summary = "Retrieve current date from server.")
 	@GetMapping("/currentdate")
 	public ResponseEntity<?> getCurrentdate() {
 		ResponseEntity<?> retVal = null;
@@ -62,6 +66,7 @@ public class OverpaymentController {
 		return retVal;
 	}
 	
+	@Operation(summary = "Retrieve available program for the victim and bad actor combination.")
 	@GetMapping("/programcodelist/{victimBadActorXrefId}")
 	public ResponseEntity<List<?>> getProgramCodeDDList(@PathVariable Long victimBadActorXrefId ) {
 		ResponseEntity<List<?>> obj = null;
@@ -82,6 +87,7 @@ public class OverpaymentController {
 		return obj;
 	}
 	
+	@Operation(summary = "Retrieve overpayment weeks for the victim and bad actor combination.")
 	@PostMapping("/overpaidweekslist")
 	public ResponseEntity<List<?>> getOverpaidWeeksList(@RequestBody ContextDataVO contextData) {
 		ResponseEntity<List<?>> obj = null;
@@ -101,6 +107,7 @@ public class OverpaymentController {
 		return obj;
 	}
 	
+	@Operation(summary = "Retrieve overpayment summary list for the victim and bad actor combination.")
 	@GetMapping("/overpaymentsummarylist/{victimBadActorXrefId}")
 	public ResponseEntity<List<?>> getITSOverpaymentSummaryList(@PathVariable Long victimBadActorXrefId ) {
 		ResponseEntity<List<?>> obj = null;
@@ -121,6 +128,7 @@ public class OverpaymentController {
 		return obj;
 	}
 	
+	@Operation(summary = "Retrieve overpayment details for the given overpayment.")
 	@GetMapping("/overpaymentandovpdetails/{overpaymentId}")
 	public ResponseEntity<?> getITSOverpaymentAndOvpDetails(@PathVariable Long overpaymentId ) {
 		ResponseEntity<?> retVal = null;
