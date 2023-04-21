@@ -21,7 +21,7 @@ public class AuditConfiguration {
 			public Optional<String> getCurrentAuditor() {
 				String userName = (String) request.getAttribute("userName");
             	if(userName!=null && !userName.isEmpty()) {
-            		return Optional.of("ITS:"+userName);
+            		return Optional.of("ITS:"+userName.toUpperCase());
             	}
             	return Optional.of("Unknown");
 			}
