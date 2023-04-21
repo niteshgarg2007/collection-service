@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.OverpaymentService;
-import com.hcl.igovern.util.DateUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
@@ -53,16 +52,6 @@ public class OverpaymentController {
 			retValException = new ResponseEntity<>(ce, HttpStatus.BAD_REQUEST);
 			return retValException;
 		}
-		return retVal;
-	}
-	
-	@Operation(summary = "Retrieve current date from server.")
-	@GetMapping("/currentdate")
-	public ResponseEntity<?> getCurrentdate() {
-		ResponseEntity<?> retVal = null;
-		OverpaidWeeksVO overpaidWeeks = new OverpaidWeeksVO();
-		overpaidWeeks.setCbwkBweDt(DateUtil.getCurrentDateString());
-		retVal = new ResponseEntity<>(overpaidWeeks, HttpStatus.CREATED);
 		return retVal;
 	}
 	

@@ -1,6 +1,7 @@
 package com.hcl.igovern.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ public class VITSOvpDistributionEO implements Serializable {
 	private String prgmCd;
 	
 	@Column(name="CBWK_BWE_DT")
-	private String cbwkBweDt;
+	private Timestamp cbwkBweDt;
 	
 	@Column(name="PRGFND_ACCT_NO")
 	private String prgfndAcctNo;
@@ -59,11 +60,11 @@ public class VITSOvpDistributionEO implements Serializable {
 		this.prgmCd = prgmCd;
 	}
 
-	public String getCbwkBweDt() {
+	public Timestamp getCbwkBweDt() {
 		return cbwkBweDt;
 	}
 
-	public void setCbwkBweDt(String cbwkBweDt) {
+	public void setCbwkBweDt(Timestamp cbwkBweDt) {
 		this.cbwkBweDt = cbwkBweDt;
 	}
 

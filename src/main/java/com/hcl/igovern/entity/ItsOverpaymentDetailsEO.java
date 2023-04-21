@@ -20,6 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -45,6 +46,17 @@ public class ItsOverpaymentDetailsEO extends Auditable<String> implements Serial
 	@Column(name="ADD_COMP_PRG_DTL_ID")
 	private Long addCompPrgDtlId;
 	
+	@Transient
+	private Double ovpAmt;
+	
+	public Double getOvpAmt() {
+		return ovpAmt;
+	}
+
+	public void setOvpAmt(Double ovpAmt) {
+		this.ovpAmt = ovpAmt;
+	}
+
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "OVP_ID")  
 	private ItsOverpaymentEO itsOverpayment;

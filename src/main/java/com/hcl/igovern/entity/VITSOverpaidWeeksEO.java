@@ -1,6 +1,7 @@
 package com.hcl.igovern.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,16 +14,15 @@ public class VITSOverpaidWeeksEO implements Serializable {
 
 	private static final long serialVersionUID = 5690637245007116487L;
 	
-	
 	@Id
 	@Column(name="WK_CERT_ID")
 	private Long wkCertId;
 	
-	@Column(name="CLAIM_ID")
-	private Long claimId;
+	@Column(name="CLM_ID")
+	private Long clmId;
 	
 	@Column(name="CBWK_BWE_DT")
-	private String cbwkBweDt;
+	private Timestamp cbwkBweDt;
 	
 	@Column(name="PAYMENT_AMOUNT")
 	private Double paymentAmount;
@@ -44,19 +44,19 @@ public class VITSOverpaidWeeksEO implements Serializable {
 		this.wkCertId = wkCertId;
 	}
 
-	public Long getClaimId() {
-		return claimId;
+	public Long getClmId() {
+		return clmId;
 	}
 
-	public void setClaimId(Long claimId) {
-		this.claimId = claimId;
+	public void setClmId(Long clmId) {
+		this.clmId = clmId;
 	}
 
-	public String getCbwkBweDt() {
+	public Timestamp getCbwkBweDt() {
 		return cbwkBweDt;
 	}
 
-	public void setCbwkBweDt(String cbwkBweDt) {
+	public void setCbwkBweDt(Timestamp cbwkBweDt) {
 		this.cbwkBweDt = cbwkBweDt;
 	}
 
