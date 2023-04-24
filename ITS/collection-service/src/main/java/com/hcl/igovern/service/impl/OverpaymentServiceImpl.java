@@ -151,8 +151,6 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 	public ItsOverpaymentVO addOverpaymentAndDetails(ItsOverpaymentVO itsOverpaymentVO) {
-		if (itsOverpaymentVO == null)
-			throw new BusinessException(ERR_CODE, "Please fill overpayment data.");
 		if (itsOverpaymentVO.getItsOverpaymentDtls().isEmpty())
 			throw new BusinessException(ERR_CODE, "Please select at-least one Overpaid Weeks");
 		if ("C".equalsIgnoreCase(itsOverpaymentVO.getOvpdisCd()) || "CAN".equalsIgnoreCase(itsOverpaymentVO.getOvpstsCd())) {
