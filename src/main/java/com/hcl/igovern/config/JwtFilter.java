@@ -33,7 +33,7 @@ public class JwtFilter extends GenericFilterBean {
 			String jwt = parseJwt(request);
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
-				request.setAttribute(AUDITOR_NAME, username);
+				request.setAttribute(AUDITOR_NAME, username.toUpperCase());
 			} else {
 				throw new ServletException("An exception occurred");
 			}
