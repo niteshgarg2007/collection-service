@@ -7,7 +7,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
+@Getter
+@NoArgsConstructor
 @Entity
 @Table(name="V_ITS_OVERPAID_WEEKS")
 public class VITSOverpaidWeeksEO implements Serializable {
@@ -35,52 +41,4 @@ public class VITSOverpaidWeeksEO implements Serializable {
 	
 	@Column(name="VICTIM_BAD_ACTOR_XREF_ID")
 	private Long victimBadActorXrefId;
-
-	public Long getWkCertId() {
-		return wkCertId;
-	}
-
-	public void setWkCertId(Long wkCertId) {
-		this.wkCertId = wkCertId;
-	}
-
-	public Long getClmId() {
-		return clmId;
-	}
-
-	public void setClmId(Long clmId) {
-		this.clmId = clmId;
-	}
-
-	public Timestamp getCbwkBweDt() {
-		return cbwkBweDt;
-	}
-
-	public void setCbwkBweDt(Timestamp cbwkBweDt) {
-		this.cbwkBweDt = cbwkBweDt;
-	}
-
-	public Double getPaymentAmount() {
-		return paymentAmount;
-	}
-
-	public void setPaymentAmount(Double paymentAmount) {
-		this.paymentAmount = paymentAmount;
-	}
-
-	public String getPrgmCd() {
-		return prgmCd;
-	}
-
-	public void setPrgmCd(String prgmCd) {
-		this.prgmCd = prgmCd;
-	}
-
-	public Long getVictimBadActorXrefId() {
-		return victimBadActorXrefId;
-	}
-
-	public void setVictimBadActorXrefId(Long victimBadActorXrefId) {
-		this.victimBadActorXrefId = victimBadActorXrefId;
-	}
 }

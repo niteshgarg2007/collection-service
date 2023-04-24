@@ -17,7 +17,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="ITS_OVERPAYMENT_DISTRIBUTIONS")
@@ -39,36 +45,4 @@ public class ItsOverpaymentDistributionsEO extends Auditable<String> implements 
 	
 	@Column(name="OVPDST_AMOUNT")
 	private Double ovpdstAmount;
-
-	public Long getOvpdstId() {
-		return ovpdstId;
-	}
-
-	public void setOvpdstId(Long ovpdstId) {
-		this.ovpdstId = ovpdstId;
-	}
-
-	public ItsOverpaymentDetailsEO getOvpdtlsId() {
-		return ovpdtlsId;
-	}
-
-	public void setOvpdtlsId(ItsOverpaymentDetailsEO ovpdtlsId) {
-		this.ovpdtlsId = ovpdtlsId;
-	}
-
-	public String getPrgfndAcctNo() {
-		return prgfndAcctNo;
-	}
-
-	public void setPrgfndAcctNo(String prgfndAcctNo) {
-		this.prgfndAcctNo = prgfndAcctNo;
-	}
-
-	public Double getOvpdstAmount() {
-		return ovpdstAmount;
-	}
-
-	public void setOvpdstAmount(Double ovpdstAmount) {
-		this.ovpdstAmount = ovpdstAmount;
-	}
 }

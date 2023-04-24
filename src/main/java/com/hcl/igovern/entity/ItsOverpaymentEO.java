@@ -17,7 +17,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="ITS_OVERPAYMENT")
@@ -50,69 +56,4 @@ public class ItsOverpaymentEO extends Auditable<String> implements Serializable 
 	
 	@OneToMany(targetEntity = ItsOverpaymentDetailsEO.class, cascade = CascadeType.ALL, mappedBy = "itsOverpayment", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentDetailsEO> itsOverpaymentDtls;
-
-	public Long getOvpId() {
-		return ovpId;
-	}
-
-	public void setOvpId(Long ovpId) {
-		this.ovpId = ovpId;
-	}
-
-	public Long getVictimBadActorXrefId() {
-		return victimBadActorXrefId;
-	}
-
-	public void setVictimBadActorXrefId(Long victimBadActorXrefId) {
-		this.victimBadActorXrefId = victimBadActorXrefId;
-	}
-
-	public String getOvpdisCd() {
-		return ovpdisCd;
-	}
-
-	public void setOvpdisCd(String ovpdisCd) {
-		this.ovpdisCd = ovpdisCd;
-	}
-
-	public String getOvpclsCd() {
-		return ovpclsCd;
-	}
-
-	public void setOvpclsCd(String ovpclsCd) {
-		this.ovpclsCd = ovpclsCd;
-	}
-
-	public String getOvpstsCd() {
-		return ovpstsCd;
-	}
-
-	public void setOvpstsCd(String ovpstsCd) {
-		this.ovpstsCd = ovpstsCd;
-	}
-
-	public String getOvporgCd() {
-		return ovporgCd;
-	}
-
-	public void setOvporgCd(String ovporgCd) {
-		this.ovporgCd = ovporgCd;
-	}
-
-	public String getOvpdorgCd() {
-		return ovpdorgCd;
-	}
-
-	public void setOvpdorgCd(String ovpdorgCd) {
-		this.ovpdorgCd = ovpdorgCd;
-	}
-
-	public List<ItsOverpaymentDetailsEO> getItsOverpaymentDtls() {
-		return itsOverpaymentDtls;
-	}
-
-	public void setItsOverpaymentDtls(List<ItsOverpaymentDetailsEO> itsOverpaymentDtls) {
-		this.itsOverpaymentDtls = itsOverpaymentDtls;
-	}
-
 }

@@ -21,7 +21,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="ITS_OVERPAYMENT_DETAILS")
@@ -46,17 +52,6 @@ public class ItsOverpaymentDetailsEO extends Auditable<String> implements Serial
 	@Column(name="ADD_COMP_PRG_DTL_ID")
 	private Long addCompPrgDtlId;
 	
-	@Transient
-	private Double ovpAmt;
-	
-	public Double getOvpAmt() {
-		return ovpAmt;
-	}
-
-	public void setOvpAmt(Double ovpAmt) {
-		this.ovpAmt = ovpAmt;
-	}
-
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "OVP_ID")  
 	private ItsOverpaymentEO itsOverpayment;
@@ -66,69 +61,7 @@ public class ItsOverpaymentDetailsEO extends Auditable<String> implements Serial
 	
 	@OneToMany(targetEntity = ItsOverpaymentTransactionsEO.class, cascade = CascadeType.ALL, mappedBy = "ovpdtlsId", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentTransactionsEO> itsOverpaymentTranDtls;
-
-	public Long getOvpdtlsId() {
-		return ovpdtlsId;
-	}
-
-	public void setOvpdtlsId(Long ovpdtlsId) {
-		this.ovpdtlsId = ovpdtlsId;
-	}
-
-	public String getOvptypCd() {
-		return ovptypCd;
-	}
-
-	public void setOvptypCd(String ovptypCd) {
-		this.ovptypCd = ovptypCd;
-	}
-
-	public Timestamp getCbwkBweDt() {
-		return cbwkBweDt;
-	}
-
-	public void setCbwkBweDt(Timestamp cbwkBweDt) {
-		this.cbwkBweDt = cbwkBweDt;
-	}
-
-	public Long getClmId() {
-		return clmId;
-	}
-
-	public void setClmId(Long clmId) {
-		this.clmId = clmId;
-	}
-
-	public Long getAddCompPrgDtlId() {
-		return addCompPrgDtlId;
-	}
-
-	public void setAddCompPrgDtlId(Long addCompPrgDtlId) {
-		this.addCompPrgDtlId = addCompPrgDtlId;
-	}
-
-	public ItsOverpaymentEO getItsOverpayment() {
-		return itsOverpayment;
-	}
-
-	public void setItsOverpayment(ItsOverpaymentEO itsOverpayment) {
-		this.itsOverpayment = itsOverpayment;
-	}
-
-	public List<ItsOverpaymentDistributionsEO> getItsOverpaymentDstDtls() {
-		return itsOverpaymentDstDtls;
-	}
-
-	public void setItsOverpaymentDstDtls(List<ItsOverpaymentDistributionsEO> itsOverpaymentDstDtls) {
-		this.itsOverpaymentDstDtls = itsOverpaymentDstDtls;
-	}
-
-	public List<ItsOverpaymentTransactionsEO> getItsOverpaymentTranDtls() {
-		return itsOverpaymentTranDtls;
-	}
-
-	public void setItsOverpaymentTranDtls(List<ItsOverpaymentTransactionsEO> itsOverpaymentTranDtls) {
-		this.itsOverpaymentTranDtls = itsOverpaymentTranDtls;
-	}
-
+	
+	@Transient
+	private Double ovpAmt;
 }
