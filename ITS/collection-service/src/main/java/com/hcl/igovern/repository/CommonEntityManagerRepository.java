@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
+import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.exception.BusinessException;
+import com.hcl.igovern.vo.ContextDataVO;
 
 import jakarta.persistence.EntityManager;
 
@@ -21,6 +23,8 @@ public class CommonEntityManagerRepository {
 
 	@Autowired
     EntityManager entityManager;
+	
+	public static final String ERR_CODE = "ERR_CODE";
 	
 	public List<VITSOverpaidWeeksEO> getProgramCodeDDList(Long victimBadActorXrefId) {
 		List<?> vITSOverpaidWeeksListTemp = null;
@@ -51,8 +55,44 @@ public class CommonEntityManagerRepository {
 			}
 		} catch (Exception e) {
 			logger.error("Exception in CommonEntityManagerRepository while calling getProgramCodeDDList method");
-			throw new BusinessException("112", "Exception in CommonEntityManagerRepository while calling getProgramCodeDDList method" +e.getMessage());
+			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getProgramCodeDDList method" +e.getMessage());
 		}
 		return vITSOverpaidWeeksList;
+	}
+
+	public VITSOverpaidWeeksUpdateEO getExistingProgramCodeDD(ContextDataVO contextData) {
+		List<?> vITSOverpaidWeeksUpdateListTemp = null;
+		List<VITSOverpaidWeeksUpdateEO> vITSOverpaidWeeksExistingList = new ArrayList<>();
+		VITSOverpaidWeeksUpdateEO vITSOverpaidWeeksUpdate = null;
+		String query=null;
+        String sql=null;
+		try {
+			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS_UPDATE "
+					+ " WHERE VICTIM_BAD_ACTOR_XREF_ID ="+contextData.getVictimBadActorXrefId() + " AND OVP_ID=" + contextData.getOvpId();
+			sql = String.format(query);
+			vITSOverpaidWeeksUpdateListTemp = entityManager.createNativeQuery(sql).getResultList();
+			if(vITSOverpaidWeeksUpdateListTemp!=null && !vITSOverpaidWeeksUpdateListTemp.isEmpty()) {
+				for (int i = 0; i < vITSOverpaidWeeksUpdateListTemp.size(); i++) {
+					vITSOverpaidWeeksUpdate = new VITSOverpaidWeeksUpdateEO();
+					Object[] val = (Object[])vITSOverpaidWeeksUpdateListTemp.get(i);
+					if (val != null && val.length > 0 && val[0] != null && val[0] instanceof BigDecimal) {
+						Long claimId = Long.valueOf(((BigDecimal) val[0]).longValue());
+						vITSOverpaidWeeksUpdate.setClmId(claimId); 
+					}
+					
+					if (val != null && val.length > 0 && val[1] != null) {
+						String prgmCd = (String) val[1];
+						vITSOverpaidWeeksUpdate.setPrgmCd(prgmCd);
+					}
+					
+					vITSOverpaidWeeksExistingList.add(vITSOverpaidWeeksUpdate);
+				}
+				vITSOverpaidWeeksUpdate = vITSOverpaidWeeksExistingList.get(0);
+			}
+		} catch (Exception e) {
+			logger.error("Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDDList method");
+			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDDList method" +e.getMessage());
+		}
+		return vITSOverpaidWeeksUpdate;
 	}
 }

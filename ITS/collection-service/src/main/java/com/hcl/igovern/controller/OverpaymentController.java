@@ -1,13 +1,10 @@
 package com.hcl.igovern.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,105 +33,134 @@ public class OverpaymentController {
 	
 	@Autowired
 	private OverpaymentService overpaymentService;
+	
+	public static final String ERR_CODE = "ERR_CODE";
 
 	@Operation(summary = "Save overpayment and its related data to database.")
 	@PostMapping("/addoverpayment")
-	public ResponseEntity<?> addOverpayment(
-				@RequestBody ItsOverpaymentVO itsOverpaymentVO) {
-		ResponseEntity<ItsOverpaymentVO> retVal = null;
+	public ItsOverpaymentVO addOverpayment(@RequestBody ItsOverpaymentVO itsOverpaymentVO) {
 		try {
 			itsOverpaymentVO = overpaymentService.addOverpaymentAndDetails(itsOverpaymentVO);
-			retVal = new ResponseEntity<>(itsOverpaymentVO, HttpStatus.CREATED);
+			if (itsOverpaymentVO != null && (itsOverpaymentVO.getStatusMessage() == null || itsOverpaymentVO.getStatusMessage().isEmpty())) {
+				throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method.");
+			}
 		} catch (BusinessException be) {
-			logger.error("Business Exception in OverpaymentController addOverpaymentAndDetails() method");
-			BusinessException ce = new BusinessException(be.getErrorCode(),be.getErrorMessage());
-			ResponseEntity<BusinessException> retValException = null;
-			retValException = new ResponseEntity<>(ce, HttpStatus.BAD_REQUEST);
-			return retValException;
+			logger.error("Business Exception in OverpaymentController addOverpayment() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method." + be.getMessage());
 		}
-		return retVal;
+		return itsOverpaymentVO;
 	}
 	
 	@Operation(summary = "Retrieve available program for the victim and bad actor combination.")
 	@GetMapping("/programcodelist/{victimBadActorXrefId}")
-	public ResponseEntity<List<?>> getProgramCodeDDList(@PathVariable Long victimBadActorXrefId ) {
-		ResponseEntity<List<?>> obj = null;
+	public List<OverpaidWeeksVO> getProgramCodeDDList(@PathVariable Long victimBadActorXrefId ) {
 		logger.info("Starting to calling getProgramCodeDDList method");
+		List<OverpaidWeeksVO> list = null;
 		try {
 			if (victimBadActorXrefId != null) {
-				List<OverpaidWeeksVO> list = overpaymentService.getProgramCodeDDList(victimBadActorXrefId);
-				obj = new ResponseEntity<>(list, HttpStatus.CREATED);
+				list = overpaymentService.getProgramCodeDDList(victimBadActorXrefId);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getProgramCodeDDList() method");
-			BusinessException ce = new BusinessException(be.getErrorCode(),be.getErrorMessage());
-			List<BusinessException> ceList = new ArrayList<>();
-			ceList.add(ce);
-			return new ResponseEntity<List<?>>(ceList, HttpStatus.BAD_REQUEST);
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getProgramCodeDDList() method." + be.getMessage());
 		}
-		
-		return obj;
+		return list;
 	}
 	
 	@Operation(summary = "Retrieve overpayment weeks for the victim and bad actor combination.")
 	@PostMapping("/overpaidweekslist")
-	public ResponseEntity<List<?>> getOverpaidWeeksList(@RequestBody ContextDataVO contextData) {
-		ResponseEntity<List<?>> obj = null;
+	public List<OverpaidWeeksVO> getOverpaidWeeksList(@RequestBody ContextDataVO contextData) {
 		logger.info("Starting to calling getOverpaidWeeksList method");
+		List<OverpaidWeeksVO> list = null;
 		try {
 			if (contextData.getInputClaimId() != null && contextData.getVictimBadActorXrefId() != null) {
-				List<OverpaidWeeksVO> list = overpaymentService.getOverpaidWeeksList(contextData);
-				obj = new ResponseEntity<>(list, HttpStatus.CREATED);
+				list = overpaymentService.getOverpaidWeeksList(contextData);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getOverpaidWeeksList() method");
-			BusinessException ce = new BusinessException(be.getErrorCode(),be.getErrorMessage());
-			List<BusinessException> ceList = new ArrayList<>();
-			ceList.add(ce);
-			return new ResponseEntity<List<?>>(ceList, HttpStatus.BAD_REQUEST);
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getOverpaidWeeksList() method." + be.getMessage());
 		}
-		return obj;
+		return list;
 	}
 	
 	@Operation(summary = "Retrieve overpayment summary list for the victim and bad actor combination.")
 	@GetMapping("/overpaymentsummarylist/{victimBadActorXrefId}")
-	public ResponseEntity<List<?>> getITSOverpaymentSummaryList(@PathVariable Long victimBadActorXrefId ) {
-		ResponseEntity<List<?>> obj = null;
+	public List<ITSOvpSummaryVO> getITSOverpaymentSummaryList(@PathVariable Long victimBadActorXrefId) {
 		logger.info("Starting to calling getITSOverpaymentSummaryList method");
+		List<ITSOvpSummaryVO> list = null;
 		try {
 			if (victimBadActorXrefId != null) {
-				List<ITSOvpSummaryVO> list = overpaymentService.getITSOverpaymentSummaryList(victimBadActorXrefId);
-				obj = new ResponseEntity<>(list, HttpStatus.CREATED);
+				list = overpaymentService.getITSOverpaymentSummaryList(victimBadActorXrefId);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getITSOverpaymentSummaryList() method");
-			BusinessException ce = new BusinessException(be.getErrorCode(),be.getErrorMessage());
-			List<BusinessException> ceList = new ArrayList<>();
-			ceList.add(ce);
-			return new ResponseEntity<List<?>>(ceList, HttpStatus.BAD_REQUEST);
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getITSOverpaymentSummaryList() method." + be.getMessage());
 		}
 		
-		return obj;
+		return list;
 	}
 	
 	@Operation(summary = "Retrieve overpayment details for the given overpayment.")
 	@GetMapping("/overpaymentandovpdetails/{overpaymentId}")
-	public ResponseEntity<?> getITSOverpaymentAndOvpDetails(@PathVariable Long overpaymentId ) {
-		ResponseEntity<?> retVal = null;
+	public ItsOverpaymentVO getITSOverpaymentAndOvpDetails(@PathVariable Long overpaymentId ) {
 		logger.info("Starting to calling getITSOverpaymentAndOvpDetails method");
+		ItsOverpaymentVO itsOverpaymentVO = null;
 		try {
 			if (overpaymentId != null) {
-				ItsOverpaymentVO itsOverpaymentVO = overpaymentService.getITSOverpaymentAndOvpDetails(overpaymentId);
-				retVal = new ResponseEntity<>(itsOverpaymentVO, HttpStatus.CREATED);
+				itsOverpaymentVO = overpaymentService.getITSOverpaymentAndOvpDetails(overpaymentId);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getITSOverpaymentAndOvpDetails() method");
-			BusinessException ce = new BusinessException(be.getErrorCode(),be.getErrorMessage());
-			ResponseEntity<BusinessException> retValException = null;
-			retValException = new ResponseEntity<>(ce, HttpStatus.BAD_REQUEST);
-			return retValException;
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getITSOverpaymentAndOvpDetails() method." + be.getMessage());
 		}
-		
-		return retVal;
+		return itsOverpaymentVO;
+	}
+	
+	@Operation(summary = "Retrieve existing program for the victim and bad actor combination.")
+	@PostMapping("/existingprogramcode")
+	public OverpaidWeeksVO getExistingProgramCodeDD(@RequestBody ContextDataVO contextData) {
+		logger.info("Starting to calling getExistingProgramCodeDD method");
+		OverpaidWeeksVO overpaidWeeks = null;
+		try {
+			if (contextData.getVictimBadActorXrefId() != null && contextData.getOvpId() != null) {
+				overpaidWeeks = overpaymentService.getExistingProgramCodeDD(contextData);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in OverpaymentController getExistingProgramCodeDD() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getExistingProgramCodeDD() method." + be.getMessage());
+		}
+		return overpaidWeeks;
+	}
+	
+	@Operation(summary = "Retrieve existing overpayment weeks for the victim and bad actor combination.")
+	@PostMapping("/existingoverpaidweekslist")
+	public List<OverpaidWeeksVO> getExistingOverpaidWeeksList(@RequestBody ContextDataVO contextData) {
+		logger.info("Starting to calling getExistingOverpaidWeeksList method");
+		List<OverpaidWeeksVO> list = null;
+		try {
+			if (contextData.getInputClaimId() != null && contextData.getVictimBadActorXrefId() != null && contextData.getOvpId() != null) {
+				list = overpaymentService.getExistingOverpaidWeeksList(contextData);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in OverpaymentController.getExistingOverpaidWeeksList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getExistingOverpaidWeeksList() method." + be.getMessage());
+		}
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve updated overpayment weeks for the victim and bad actor combination.")
+	@PostMapping("/overpaidweeksupdatedlist")
+	public List<OverpaidWeeksVO> getOverpaidWeeksUpdatedList(@RequestBody ContextDataVO contextData) {
+		logger.info("Starting to calling getOverpaidWeeksUpdatedList method");
+		List<OverpaidWeeksVO> list = null;
+		try {
+			if (contextData.getInputClaimId() != null && contextData.getVictimBadActorXrefId() != null) {
+				list = overpaymentService.getOverpaidWeeksUpdatedList(contextData);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in OverpaymentController.getOverpaidWeeksUpdatedList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getOverpaidWeeksUpdatedList() method." + be.getMessage());
+		}
+		return list;
 	}
 }
