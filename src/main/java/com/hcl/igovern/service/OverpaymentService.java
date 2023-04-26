@@ -18,4 +18,10 @@ public interface OverpaymentService {
 	List<ITSOvpSummaryVO> getITSOverpaymentSummaryList(Long victimBadActorXrefId);
 
 	ItsOverpaymentVO getITSOverpaymentAndOvpDetails(Long overpaymentId);
+
+	OverpaidWeeksVO getExistingProgramCodeDD(ContextDataVO contextData);
+
+	List<OverpaidWeeksVO> getExistingOverpaidWeeksList(ContextDataVO contextData);
+
+	List<OverpaidWeeksVO> getOverpaidWeeksUpdatedList(ContextDataVO contextData);
 }
