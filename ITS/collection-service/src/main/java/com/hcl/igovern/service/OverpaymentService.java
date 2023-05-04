@@ -24,4 +24,6 @@ public interface OverpaymentService {
 	List<OverpaidWeeksVO> getExistingOverpaidWeeksList(ContextDataVO contextData);
 
 	List<OverpaidWeeksVO> getOverpaidWeeksUpdatedList(ContextDataVO contextData);
+
+	List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(Long selectedOverpaymentId);
 }

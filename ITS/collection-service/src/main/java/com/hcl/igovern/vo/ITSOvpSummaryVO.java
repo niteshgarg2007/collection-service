@@ -1,7 +1,5 @@
 package com.hcl.igovern.vo;
 
-import java.sql.Timestamp;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,4 +22,10 @@ public class ITSOvpSummaryVO {
 	private String ovporgCd;
 	private String ovpdorgCd;
 	private String statusMessage;
+	private String dateCreated;
+	private String createdBy;
+	private Long badActorId;
+	private String badActorSsn;
+	private String prtyTaxId;
+	private Double ovpCurrentBalance;
 }

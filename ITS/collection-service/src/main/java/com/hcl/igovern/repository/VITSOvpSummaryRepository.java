@@ -12,4 +12,6 @@ public interface VITSOvpSummaryRepository extends JpaRepository<VITSOvpSummaryEO
 
 	List<VITSOvpSummaryEO> findByVictimBadActorXrefId(Long victimBadActorXrefId);
 
+	List<VITSOvpSummaryEO> findByBadActorId(Long badActorId);
+
 }

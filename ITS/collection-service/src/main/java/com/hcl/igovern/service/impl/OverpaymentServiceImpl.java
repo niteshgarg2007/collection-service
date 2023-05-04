@@ -22,17 +22,17 @@ import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.entity.VITSOverpaymentUpdateEO;
 import com.hcl.igovern.entity.VITSOvpDistributionEO;
 import com.hcl.igovern.entity.VITSOvpDistributionExistingEO;
+import com.hcl.igovern.entity.VITSOvpStatusHistoryEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.CommonEntityManagerRepository;
-import com.hcl.igovern.repository.OverpaymentDetailsRepository;
-import com.hcl.igovern.repository.OverpaymentDistributionsRepository;
 import com.hcl.igovern.repository.OverpaymentRepository;
 import com.hcl.igovern.repository.VITSOverpaidWeeksRepository;
 import com.hcl.igovern.repository.VITSOverpaidWeeksUpdateRepository;
 import com.hcl.igovern.repository.VITSOverpaymentUpdateRepository;
 import com.hcl.igovern.repository.VITSOvpDistributionExistingRepository;
 import com.hcl.igovern.repository.VITSOvpDistributionRepository;
+import com.hcl.igovern.repository.VITSOvpStatusHistoryRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
 import com.hcl.igovern.service.OverpaymentService;
 import com.hcl.igovern.util.DateUtil;
@@ -69,13 +69,10 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	private VITSOverpaidWeeksUpdateRepository vITSOverpaidWeeksUpdateRepository;
 	
 	@Autowired
-	private OverpaymentDetailsRepository overpaymentDetailsRepository;
-	
-	@Autowired
-	private OverpaymentDistributionsRepository overpaymentDistributionsRepository;
-	
-	@Autowired
 	private VITSOvpDistributionExistingRepository vITSOvpDistributionExistingRepository;
+	
+	@Autowired
+	private VITSOvpStatusHistoryRepository vITSOvpStatusHistoryRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -176,11 +173,17 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		}
 		try {
 			ItsOverpaymentEO itsOverpaymentEO = createOverpaymentDetailsData(itsOverpaymentVO);
-			if (!itsOverpaymentEO.getItsOverpaymentDtls().isEmpty()) {
-				itsOverpaymentEO = createOvpDstAndTransData(itsOverpaymentEO);
+			// temporary added below condition to prevent over payment details data to update in the table, will remove
+			if (itsOverpaymentVO.getOvpId() == null) {
+				if (!itsOverpaymentEO.getItsOverpaymentDtls().isEmpty()) {
+					itsOverpaymentEO = createOvpDstAndTransData(itsOverpaymentEO);
+				}
 			}
 			overpaymentRepository.save(itsOverpaymentEO);
-			itsOverpaymentVO.setStatusMessage("Overpayment has been successfully added.");
+			if (itsOverpaymentVO.getOvpId() != null)
+				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully updated.");
+			else
+				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully added.");
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl addOverpaymentAndDetails method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.addOverpaymentAndDetails() method." + e.getMessage());
@@ -198,45 +201,49 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 			itsOverpaymentTemp.setOvpclsCd(itsOverpaymentVO.getOvpclsCd());
 			itsOverpaymentTemp.setOvpstsCd(itsOverpaymentVO.getOvpstsCd());
 			itsOverpaymentTemp.setOvporgCd(itsOverpaymentVO.getOvporgCd());
+			itsOverpaymentTemp.setOvpId(itsOverpaymentVO.getOvpId());
 			itsOverpaymentTemp.setOvpdorgCd(itsOverpaymentVO.getOvpdorgCd());
-			if (!itsOverpaymentVO.getItsOverpaymentDtls().isEmpty()) {
-				for (OverpaidWeeksVO overpaidWeeksTemp : itsOverpaymentVO.getItsOverpaymentDtls()) {
+			// temporary added below condition to prevent over payment details data to update in the table, will remove
+			if (itsOverpaymentVO.getOvpId() == null) {
+				if (!itsOverpaymentVO.getItsOverpaymentDtls().isEmpty()) {
+					for (OverpaidWeeksVO overpaidWeeksTemp : itsOverpaymentVO.getItsOverpaymentDtls()) {
+						ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+						itsOverpaymentVO.setProgCode(overpaidWeeksTemp.getPrgmCd());
+						itsOvpDetails.setOvptypCd("S");
+						itsOvpDetails.setCbwkBweDt(DateUtil.strDateToTs(overpaidWeeksTemp.getCbwkBweDt()));
+						setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+						itsOvpDetails.setOvpAmt(overpaidWeeksTemp.getPaymentAmount());
+						itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+						itsOverpaymentDetailsList.add(itsOvpDetails);
+					}
+				}
+				if (itsOverpaymentVO.getPenalty() != null && itsOverpaymentVO.getPenalty() > 0) {
 					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-					itsOverpaymentVO.setProgCode(overpaidWeeksTemp.getPrgmCd());
-					itsOvpDetails.setOvptypCd("S");
-					itsOvpDetails.setCbwkBweDt(DateUtil.strDateToTs(overpaidWeeksTemp.getCbwkBweDt()));
+					itsOvpDetails.setOvptypCd("P");
+					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getPenalty());
 					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-					itsOvpDetails.setOvpAmt(overpaidWeeksTemp.getPaymentAmount());
 					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
 					itsOverpaymentDetailsList.add(itsOvpDetails);
 				}
+				if (itsOverpaymentVO.getInterest() != null && itsOverpaymentVO.getInterest() > 0) {
+					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+					itsOvpDetails.setOvptypCd("I");
+					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getInterest());
+					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+					itsOverpaymentDetailsList.add(itsOvpDetails);
+				}
+				if (itsOverpaymentVO.getCoc() != null && itsOverpaymentVO.getCoc() > 0) {
+					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+					itsOvpDetails.setOvptypCd("C");
+					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getCoc());
+					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+					itsOverpaymentDetailsList.add(itsOvpDetails);
+				}
+				
+				itsOverpaymentTemp.setItsOverpaymentDtls(itsOverpaymentDetailsList);
 			}
-			if (itsOverpaymentVO.getPenalty() != null && itsOverpaymentVO.getPenalty() > 0) {
-				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-				itsOvpDetails.setOvptypCd("P");
-				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getPenalty());
-				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-				itsOverpaymentDetailsList.add(itsOvpDetails);
-			}
-			if (itsOverpaymentVO.getInterest() != null && itsOverpaymentVO.getInterest() > 0) {
-				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-				itsOvpDetails.setOvptypCd("I");
-				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getInterest());
-				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-				itsOverpaymentDetailsList.add(itsOvpDetails);
-			}
-			if (itsOverpaymentVO.getCoc() != null && itsOverpaymentVO.getCoc() > 0) {
-				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-				itsOvpDetails.setOvptypCd("C");
-				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getCoc());
-				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-				itsOverpaymentDetailsList.add(itsOvpDetails);
-			}
-			
-			itsOverpaymentTemp.setItsOverpaymentDtls(itsOverpaymentDetailsList);
 		
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl createOverpaymentDetailsData method");
@@ -481,5 +488,29 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		}
 		
 		return overpaidWeeksVOList;
+	}
+
+	@Override 
+	public List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(Long selectedOverpaymentId) {
+		List<VITSOvpStatusHistoryEO> vITSOvpStatusHistoryEOList = null;
+		List<ITSOvpSummaryVO> itsOvpSummaryVOList = new ArrayList<>();
+		try {
+			vITSOvpStatusHistoryEOList = vITSOvpStatusHistoryRepository.findByOvpId(selectedOverpaymentId);
+			if (vITSOvpStatusHistoryEOList != null && !vITSOvpStatusHistoryEOList.isEmpty()) {
+				for (VITSOvpStatusHistoryEO vITSOvpStatusHistoryEOObj : vITSOvpStatusHistoryEOList) {
+					if (vITSOvpStatusHistoryEOObj != null) {
+						ITSOvpSummaryVO itsOvpSummaryVOObj = new ITSOvpSummaryVO();
+						BeanUtils.copyProperties(vITSOvpStatusHistoryEOObj, itsOvpSummaryVOObj);
+						itsOvpSummaryVOObj.setDateCreated(DateUtil.tsDateToStr(vITSOvpStatusHistoryEOObj.getDateCreated()));
+						itsOvpSummaryVOList.add(itsOvpSummaryVOObj);
+					}
+				}
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.getITSOverpaymentStatusHistoryList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getITSOverpaymentStatusHistoryList() method." + e.getMessage());
+		}
+		
+		return itsOvpSummaryVOList;
 	}
 }
