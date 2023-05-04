@@ -45,7 +45,7 @@ public class OverpaymentController {
 				throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method.");
 			}
 		} catch (BusinessException be) {
-			logger.error("Business Exception in OverpaymentController addOverpayment() method");
+			logger.error("Business Exception in OverpaymentController.addOverpayment() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method." + be.getMessage());
 		}
 		return itsOverpaymentVO;
@@ -161,6 +161,23 @@ public class OverpaymentController {
 			logger.error("Business Exception in OverpaymentController.getOverpaidWeeksUpdatedList() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getOverpaidWeeksUpdatedList() method." + be.getMessage());
 		}
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve overpayment status history list for the selected overpayment id.")
+	@GetMapping("/overpaymentstatushistorylist/{selectedOverpaymentId}")
+	public List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(@PathVariable Long selectedOverpaymentId) {
+		logger.info("Starting to calling getITSOverpaymentStatusHistoryList method");
+		List<ITSOvpSummaryVO> list = null;
+		try {
+			if (selectedOverpaymentId != null) {
+				list = overpaymentService.getITSOverpaymentStatusHistoryList(selectedOverpaymentId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in OverpaymentController.getITSOverpaymentStatusHistoryList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getITSOverpaymentStatusHistoryList() method." + be.getMessage());
+		}
+		
 		return list;
 	}
 }

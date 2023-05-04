@@ -6,12 +6,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.hcl.igovern.auditing.Auditable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,11 +36,13 @@ public class ItsOvpRecvDistributionsEO extends Auditable<String> implements Seri
 	@Column(name="OVP_RECV_DST_ID")
 	private Long ovpRecvDstId;
 	
-	@Column(name="OVPDTLS_ID")
-	private Long ovpdtlsId;
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name="OVPDTLS_ID")
+	private ItsOverpaymentDetailsEO ovpdtlsId;
 	
-	@Column(name="RECOVERY_DTLS_ID")
-	private Long recoveryDtlsId;
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name="RECOVERY_DTLS_ID")
+	private ItsRecoveryDetailsEO recoveryDtlsId;
 	
 	@Column(name="PRGFND_ACCT_NO")
 	private String prgfndAcctNo;

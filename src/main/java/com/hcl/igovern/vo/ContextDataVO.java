@@ -13,4 +13,5 @@ public class ContextDataVO {
 	private Long inputClaimId;
 	private Long victimBadActorXrefId;
 	private Long ovpId;
+	private Long badActorId;
 }
