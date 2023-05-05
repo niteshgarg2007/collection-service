@@ -6,6 +6,7 @@ import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 
 public interface RecoveryService {
@@ -17,5 +18,9 @@ public interface RecoveryService {
 	List<ITSRecoverySummaryVO> getITSRecoverySummaryList(Long victimBadActorXrefId);
 
 	List<ITSRecoveryHistoryVO> getITSRecoveryHistoryList(Long selectedRecoveryId);
+
+	ItsRecoveryVO getITSRecoveryDataByRecoveryId(Long recoveryId);
+
+	List<ItsRecoveryDetailsVO> getExistingRecoveryDetailsList(ContextDataVO contextData);
 
 }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name="V_ITS_RECOVERY_SUMMARY")
-public class VITSRecoverySummaryEO implements Serializable{
+public class VITSRecoverySummaryEO implements Serializable {
 
 	private static final long serialVersionUID = -69084212000971576L;
 	
