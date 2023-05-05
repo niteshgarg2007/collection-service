@@ -2,6 +2,7 @@ package com.hcl.igovern.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,15 +14,19 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hcl.igovern.entity.ITSRecoveryHistoryEO;
+import com.hcl.igovern.entity.ItsBadActorDetailsEO;
 import com.hcl.igovern.entity.ItsClaimantDetailsEO;
 import com.hcl.igovern.entity.ItsRecoveryDetailsEO;
 import com.hcl.igovern.entity.ItsRecoveryEO;
 import com.hcl.igovern.entity.ItsRefundsEO;
 import com.hcl.igovern.entity.ItsVictimBadActorXrefEO;
+import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
+import com.hcl.igovern.entity.VITSOverpaymentUpdateEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.ITSRecoveryHistoryRepository;
+import com.hcl.igovern.repository.ItsBadActorDetailsRepository;
 import com.hcl.igovern.repository.ItsClaimantDetailsRepository;
 import com.hcl.igovern.repository.ItsRecoveryRepository;
 import com.hcl.igovern.repository.ItsRefundsRepository;
@@ -34,8 +39,10 @@ import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
+import com.hcl.igovern.vo.OverpaidWeeksVO;
 
 @Service
 public class RecoveryServiceImpl implements RecoveryService {
@@ -62,6 +69,9 @@ public class RecoveryServiceImpl implements RecoveryService {
 	
 	@Autowired
 	private ITSRecoveryHistoryRepository itsRecoveryHistoryRepository;
+	
+	@Autowired
+	private ItsBadActorDetailsRepository itsBadActorDetailsRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -180,7 +190,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 			vITSOvpSummaryEOList = vITSOvpSummaryRepository.findByVictimBadActorXrefId(victimBadActorXrefId);
 			if (vITSOvpSummaryEOList != null && !vITSOvpSummaryEOList.isEmpty()) {
 				for (VITSOvpSummaryEO vITSOvpSummaryObj : vITSOvpSummaryEOList) {
-					if (vITSOvpSummaryObj != null) {
+					if (vITSOvpSummaryObj != null && vITSOvpSummaryObj.getOvpBalance() > 0) {
 						ITSOvpSummaryVO itsOvpSummaryVOObj = new ITSOvpSummaryVO();
 						BeanUtils.copyProperties(vITSOvpSummaryObj, itsOvpSummaryVOObj);
 						itsOvpSummaryVOObj.setOvpCurrentBalance(vITSOvpSummaryObj.getOvpBalance());
@@ -297,5 +307,127 @@ public class RecoveryServiceImpl implements RecoveryService {
 		}
 		
 		return itsRecoveryHistoryVOList;
+	}
+
+	@Override
+	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(Long recoveryId) {
+		ItsRecoveryVO itsRecoveryVO  = new ItsRecoveryVO();
+		ItsRecoveryEO itsRecoveryEO = null;
+		try {
+			Optional<ItsRecoveryEO> itsRecoveryEOOpt = itsRecoveryRepository.findById(recoveryId);
+			if (itsRecoveryEOOpt.isPresent()) {
+				itsRecoveryEO = itsRecoveryEOOpt.get();
+				BeanUtils.copyProperties(itsRecoveryEO, itsRecoveryVO);
+				itsRecoveryVO.setRecoveryDate(DateUtil.tsDateToStr(itsRecoveryEO.getRecoveryDate()));
+				itsRecoveryVO.setRecoveryEffDate(DateUtil.tsDateToStr(itsRecoveryEO.getRecoveryEffDate()));
+			}
+		} catch (IllegalArgumentException ia) {
+			logger.error("Business Exception in RecoveryServiceImpl.getITSRecoveryDataByRecoveryId method");
+			throw new BusinessException("ERR_CODE1", "Given recovery Id is null, Please provide valid recovery Id." +ia.getMessage());
+		} catch (java.util.NoSuchElementException e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getITSRecoveryDataByRecoveryId method");
+			throw new BusinessException("ERR_CODE2", "Given recovery Id does not exist in Database." +e.getMessage());
+		}
+		
+		return itsRecoveryVO;
+	}
+
+	@Override
+	public List<ItsRecoveryDetailsVO> getExistingRecoveryDetailsList(ContextDataVO contextData) {
+		List<ItsRecoveryDetailsVO> itsRecoveryDetailsVOList = null;
+		ItsRecoveryEO itsRecoveryEO = null;
+		try {
+			logger.info("Starting to calling RecoveryServiceImpl.getExistingRecoveryDetailsList method");
+			Optional<ItsRecoveryEO> itsRecoveryEOOpt = itsRecoveryRepository.findById(contextData.getRecoveryId());
+			if (itsRecoveryEOOpt.isPresent()) {
+				itsRecoveryEO = itsRecoveryEOOpt.get();
+				itsRecoveryDetailsVOList = populateExistingRecoveryDetailsVOList(itsRecoveryEO);
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getExistingRecoveryDetailsList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getExistingRecoveryDetailsList() method." + e.getMessage());
+		}
+		
+		return itsRecoveryDetailsVOList;
+	
+	}
+
+	private List<ItsRecoveryDetailsVO> populateExistingRecoveryDetailsVOList(ItsRecoveryEO itsRecoveryEO) {
+		List<ItsRecoveryDetailsVO> itsRecoveryDetailsVOList = new ArrayList<>();
+		try {
+			if (itsRecoveryEO.getItsRecoveryDtls() != null && !itsRecoveryEO.getItsRecoveryDtls().isEmpty()) {
+				for (ItsRecoveryDetailsEO recoveryDtlsObj : itsRecoveryEO.getItsRecoveryDtls()) {
+					ItsRecoveryDetailsVO itsRecoveryDetailsVO = new ItsRecoveryDetailsVO();
+					String badActorSsn = getBadActorSSNByVictimBadActorXrefId(recoveryDtlsObj.getVictimBadActorXrefId());
+					itsRecoveryDetailsVO.setBadActorSsn(badActorSsn);
+					String originalSsn = getOriginalSSNVictimBadActorXrefId(recoveryDtlsObj.getVictimBadActorXrefId());
+					itsRecoveryDetailsVO.setOriginalSsn(originalSsn);
+					itsRecoveryDetailsVO.setOvpId(recoveryDtlsObj.getOvpId());
+					Optional<VITSOvpSummaryEO> vITSOvpSummaryEOOpt = vITSOvpSummaryRepository.findById(recoveryDtlsObj.getOvpId());
+					if (vITSOvpSummaryEOOpt.isPresent()) {
+						VITSOvpSummaryEO vITSOvpSummaryEO = vITSOvpSummaryEOOpt.get();
+						itsRecoveryDetailsVO.setTotalOvpAmount(vITSOvpSummaryEO.getOvpBalance());
+						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSOvpSummaryEO.getOvpBalance() - recoveryDtlsObj.getPaymentAmount());
+					}
+					itsRecoveryDetailsVO.setPaymentAmount(recoveryDtlsObj.getPaymentAmount());
+					itsRecoveryDetailsVO.setPaymentMethod(recoveryDtlsObj.getPaymentMethod());
+					itsRecoveryDetailsVO.setComment(recoveryDtlsObj.getComment());
+					itsRecoveryDetailsVOList.add(itsRecoveryDetailsVO);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.populateExistingRecoveryDetailsVOList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.populateExistingRecoveryDetailsVOList() method." + e.getMessage());
+		}
+		
+		return itsRecoveryDetailsVOList;
+	}
+
+	private String getOriginalSSNVictimBadActorXrefId(Long victimBadActorXrefId) {
+		String originalSSN = null;
+		try {
+			Optional<ItsVictimBadActorXrefEO> itsVictimBadActorXrefEOOpt = itsVictimBadActorXrefRepository.findById(victimBadActorXrefId);
+			if (itsVictimBadActorXrefEOOpt.isPresent()) {
+				ItsVictimBadActorXrefEO itsVictimBadActorXrefEO = itsVictimBadActorXrefEOOpt.get();
+				if (itsVictimBadActorXrefEO != null) {
+					Optional<ItsClaimantDetailsEO> itsClaimantDetailsEOOpt = itsClaimantDetailsRepository.findById(itsVictimBadActorXrefEO.getClmtDtlId());
+					if (itsClaimantDetailsEOOpt.isPresent()) {
+						ItsClaimantDetailsEO itsClaimantDetailsEO = itsClaimantDetailsEOOpt.get();
+						if (itsClaimantDetailsEO != null && itsClaimantDetailsEO.getPrtyTaxId() != null) {
+							originalSSN = itsClaimantDetailsEO.getPrtyTaxId();
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getOriginalSSNVictimBadActorXrefId method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getOriginalSSNVictimBadActorXrefId() method." + e.getMessage());
+		}
+		
+		return originalSSN;
+	}
+
+	private String getBadActorSSNByVictimBadActorXrefId(Long victimBadActorXrefId) {
+		String badActorSSN = null;
+		try {
+			Optional<ItsVictimBadActorXrefEO> itsVictimBadActorXrefEOOpt = itsVictimBadActorXrefRepository.findById(victimBadActorXrefId);
+			if (itsVictimBadActorXrefEOOpt.isPresent()) {
+				ItsVictimBadActorXrefEO itsVictimBadActorXrefEO = itsVictimBadActorXrefEOOpt.get();
+				if (itsVictimBadActorXrefEO != null) {
+					Optional<ItsBadActorDetailsEO> itsBadActorDetailsEOOpt = itsBadActorDetailsRepository.findById(itsVictimBadActorXrefEO.getBadActorId());
+					if (itsBadActorDetailsEOOpt.isPresent()) {
+						ItsBadActorDetailsEO itsBadActorDetailsEO = itsBadActorDetailsEOOpt.get();
+						if (itsBadActorDetailsEO != null && itsBadActorDetailsEO.getBadActSSN() != null) {
+							badActorSSN = itsBadActorDetailsEO.getBadActSSN();
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getBadActorSSNByVictimBadActorXrefId method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getBadActorSSNByVictimBadActorXrefId() method." + e.getMessage());
+		}
+		
+		return badActorSSN;
 	}
 }

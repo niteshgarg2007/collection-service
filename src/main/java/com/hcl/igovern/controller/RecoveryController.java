@@ -20,7 +20,10 @@ import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ItsOverpaymentVO;
+import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
+import com.hcl.igovern.vo.OverpaidWeeksVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -103,6 +106,36 @@ public class RecoveryController {
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRecoveryHistoryList() method." + be.getMessage());
 		}
 		
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve recovery data for the given recovery.")
+	@GetMapping("/itsrecoverydata/{recoveryId}")
+	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(@PathVariable Long recoveryId ) {
+		logger.info("Starting to calling getITSRecoveryDataByRecoveryId method");
+		ItsRecoveryVO itsRecoveryVO = null;
+		try {
+			if (recoveryId != null) {
+				itsRecoveryVO = recoveryService.getITSRecoveryDataByRecoveryId(recoveryId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getITSRecoveryDataByRecoveryId() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRecoveryDataByRecoveryId() method." + be.getMessage());
+		}
+		return itsRecoveryVO;
+	}
+	
+	@Operation(summary = "Retrieve existing recovery details.")
+	@PostMapping("/existingrecoverydetailslist")
+	public List<ItsRecoveryDetailsVO> getExistingRecoveryDetailsList(@RequestBody ContextDataVO contextData) {
+		logger.info("Starting to calling getExistingRecoveryDetailsList method");
+		List<ItsRecoveryDetailsVO> list = null;
+		try {
+			list = recoveryService.getExistingRecoveryDetailsList(contextData);
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getExistingRecoveryDetailsList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getExistingRecoveryDetailsList() method." + be.getMessage());
+		}
 		return list;
 	}
 }
