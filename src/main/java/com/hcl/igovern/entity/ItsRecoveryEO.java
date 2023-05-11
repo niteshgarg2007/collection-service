@@ -61,6 +61,6 @@ public class ItsRecoveryEO extends Auditable<String> implements Serializable {
 	@Column(name="REFUND_EXCESS_IND")
 	private String refundExcessInd;
 	
-	@OneToMany(targetEntity = ItsRecoveryDetailsEO.class, cascade = CascadeType.ALL, mappedBy = "recoveryId", fetch=FetchType.EAGER)
+	@OneToMany(targetEntity = ItsRecoveryDetailsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "recoveryId", fetch=FetchType.EAGER)
 	private List<ItsRecoveryDetailsEO> itsRecoveryDtls;
 }

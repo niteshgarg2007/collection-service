@@ -15,4 +15,5 @@ public class ContextDataVO {
 	private Long ovpId;
 	private Long badActorId;
 	private Long recoveryId;
+	private String allOvpUpdateInd;
 }

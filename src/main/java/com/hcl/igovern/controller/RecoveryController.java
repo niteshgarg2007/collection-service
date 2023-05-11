@@ -20,10 +20,8 @@ import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
-import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
-import com.hcl.igovern.vo.OverpaidWeeksVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -135,6 +133,20 @@ public class RecoveryController {
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getExistingRecoveryDetailsList() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getExistingRecoveryDetailsList() method." + be.getMessage());
+		}
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve existing recovery and overpayment details.")
+	@PostMapping("/recoveryUpdatedetailslist")
+	public List<ItsRecoveryDetailsVO> getOverpaymentUpdateDetailsListByParams(@RequestBody ContextDataVO contextData) {
+		logger.info("Starting to calling getOverpaymentUpdateDetailsListByParams method");
+		List<ItsRecoveryDetailsVO> list = null;
+		try {
+			list = recoveryService.getOverpaymentUpdateDetailsListByParams(contextData);
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getOverpaymentUpdateDetailsListByParams() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getOverpaymentUpdateDetailsListByParams() method." + be.getMessage());
 		}
 		return list;
 	}

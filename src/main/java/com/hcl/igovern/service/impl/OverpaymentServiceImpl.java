@@ -36,6 +36,7 @@ import com.hcl.igovern.repository.VITSOvpStatusHistoryRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
 import com.hcl.igovern.service.OverpaymentService;
 import com.hcl.igovern.util.DateUtil;
+import com.hcl.igovern.util.UIDateRoutines;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
@@ -347,7 +348,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		itsOverpaymentVO.setOvpId(vITSOverpaymentUpdateEO.getOvpId());
 		itsOverpaymentVO.setVictimBadActorXrefId(vITSOverpaymentUpdateEO.getVictimBadActorXrefId());
 		itsOverpaymentVO.setDateCreated(vITSOverpaymentUpdateEO.getDateCreated());
-		itsOverpaymentVO.setDateModified(DateUtil.getCurrentDateString());
+		itsOverpaymentVO.setDateModified(UIDateRoutines.getSysdate()!=null?UIDateRoutines.getDateString(UIDateRoutines.getSysdate(),null):null);
 		itsOverpaymentVO.setOvpdisCd(vITSOverpaymentUpdateEO.getOvpdisCd());
 		itsOverpaymentVO.setOvpclsCd(vITSOverpaymentUpdateEO.getOvpclsCd());
 		itsOverpaymentVO.setOvpstsCd(vITSOverpaymentUpdateEO.getOvpstsCd());
