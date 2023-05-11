@@ -23,4 +23,6 @@ public interface RecoveryService {
 
 	List<ItsRecoveryDetailsVO> getExistingRecoveryDetailsList(ContextDataVO contextData);
 
+	List<ItsRecoveryDetailsVO> getOverpaymentUpdateDetailsListByParams(ContextDataVO contextData);
+
 }

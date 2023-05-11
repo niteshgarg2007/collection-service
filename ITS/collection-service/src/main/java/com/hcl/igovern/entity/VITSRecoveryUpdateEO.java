@@ -58,7 +58,7 @@ public class VITSRecoveryUpdateEO implements Serializable {
 	private Double totalRecoveryAmount;
 	
 	@Column(name="ALL_OVP_IND")
-	private Long allOvpInd;
+	private String allOvpInd;
 	
 	@Column(name="REFUND_EXCESS_IND")
 	private String refundExcessId;
