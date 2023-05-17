@@ -34,7 +34,10 @@ public class VITSRecoveryUpdateEO implements Serializable {
 	private String badActorSsn;
 	
 	@Column(name="PRTY_TAX_ID")
-	private String prtytaxId;
+	private String prtyTaxId;
+	
+	@Column(name="OVP_TOTAL")
+	private Double ovpTotal;
 	
 	@Column(name="OVP_BALANCE")
 	private Double ovpBalance;

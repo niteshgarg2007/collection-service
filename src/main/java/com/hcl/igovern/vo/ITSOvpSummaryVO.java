@@ -15,6 +15,7 @@ public class ITSOvpSummaryVO {
 	private Double ovpCoc;
 	private Double recoveryAmount;
 	private Double restiAmount;
+	private Double ovpTotal;
 	private Double ovpBalance;
 	private String ovpstsCd;
 	private String ovpdisCd;

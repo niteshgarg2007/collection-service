@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.RecoveryService;
 import com.hcl.igovern.vo.ContextDataVO;
-import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
+import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 
@@ -55,9 +56,9 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve overpayment details for the victim and bad actor combination or bad actor.")
 	@PostMapping("/overpaymentdetailslist")
-	public List<ITSOvpSummaryVO> getOverpaymentDetailsList(@RequestBody ContextDataVO contextData) {
+	public List<ITSRecoveryUpdateVO> getOverpaymentDetailsList(@RequestBody ContextDataVO contextData) {
 		logger.info("Starting to calling getOverpaymentDetailsList method");
-		List<ITSOvpSummaryVO> list = null;
+		List<ITSRecoveryUpdateVO> list = null;
 		try {
 			if (contextData.getVictimBadActorXrefId() != null) {
 				list = recoveryService.getOverpaymentDetailsList(contextData);
@@ -148,6 +149,39 @@ public class RecoveryController {
 			logger.error("Business Exception in RecoveryController.getOverpaymentUpdateDetailsListByParams() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getOverpaymentUpdateDetailsListByParams() method." + be.getMessage());
 		}
+		return list;
+	}
+	
+	@Operation(summary = "process given recovery.")
+	@GetMapping("/processrecovery/{recoveryId}")
+	public ItsRecoveryVO processSelectedRecovery(@PathVariable Long recoveryId ) {
+		logger.info("Starting to calling processSelectedRecovery method");
+		ItsRecoveryVO itsRecoveryVO = null;
+		try {
+			if (recoveryId != null) {
+				itsRecoveryVO = recoveryService.processSelectedRecovery(recoveryId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.processSelectedRecovery() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.processSelectedRecovery() method." + be.getMessage());
+		}
+		return itsRecoveryVO;
+	}
+	
+	@Operation(summary = "Retrieve refunds list for the bad actor.")
+	@GetMapping("/itsrefundslist/{badActorId}")
+	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable Long badActorId) {
+		logger.info("Starting to calling getITSRefundsListList method");
+		List<ITSRefundsDataVO> list = null;
+		try {
+			if (badActorId != null) {
+				list = recoveryService.getITSRefundsListList(badActorId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getITSRefundsListList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRefundsListList() method." + be.getMessage());
+		}
+		
 		return list;
 	}
 }

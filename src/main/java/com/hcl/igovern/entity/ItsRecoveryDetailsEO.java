@@ -38,7 +38,7 @@ public class ItsRecoveryDetailsEO extends Auditable<String> implements Serializa
 	@Column(name="RECOVERY_DTLS_ID")
 	private Long recoveryDtlsId;
 	
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name="RECOVERY_ID")
 	private ItsRecoveryEO recoveryId;
 	
@@ -57,7 +57,10 @@ public class ItsRecoveryDetailsEO extends Auditable<String> implements Serializa
 	@Column(name="COMMENT")
 	private String comment;
 	
-	@OneToMany(targetEntity = ItsOverpaymentTransactionsEO.class, cascade = CascadeType.ALL, mappedBy = "recoveryDtlsId", fetch=FetchType.EAGER)
+	@OneToMany(targetEntity = ItsOverpaymentTransactionsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "recoveryDtlsId", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentTransactionsEO> itsOverpaymentTranDtls;
+	
+	@OneToMany(targetEntity = ItsOvpRecvDistributionsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "recoveryDtlsId", fetch=FetchType.EAGER)
+	private List<ItsOvpRecvDistributionsEO> itsOvpRecvDstsDtls;
 
 }

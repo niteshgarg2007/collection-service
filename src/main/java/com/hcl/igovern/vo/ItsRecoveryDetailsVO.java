@@ -21,4 +21,5 @@ public class ItsRecoveryDetailsVO {
 	private Double paymentAmount;
 	private String comment;
 	private List<ItsOverpaymentTransactionsVO> itsOverpaymentTranDtlsVO;
+	private Double ovpBalanceCheck;
 }

@@ -44,6 +44,9 @@ public class VITSOvpSummaryEO implements Serializable {
 	@Column(name="RESTI_AMOUNT")
 	private Double restiAmount;
 	
+	@Column(name="OVP_TOTAL")
+	private Double ovpTotal;
+	
 	@Column(name="OVP_BALANCE")
 	private Double ovpBalance;
 	

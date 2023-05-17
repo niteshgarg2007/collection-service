@@ -36,11 +36,11 @@ public class ItsOvpRecvDistributionsEO extends Auditable<String> implements Seri
 	@Column(name="OVP_RECV_DST_ID")
 	private Long ovpRecvDstId;
 	
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name="OVPDTLS_ID")
 	private ItsOverpaymentDetailsEO ovpdtlsId;
 	
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name="RECOVERY_DTLS_ID")
 	private ItsRecoveryDetailsEO recoveryDtlsId;
 	
