@@ -54,6 +54,6 @@ public class ItsOverpaymentEO extends Auditable<String> implements Serializable 
 	@Column(name="OVPDORG_CD")
 	private String ovpdorgCd;
 	
-	@OneToMany(targetEntity = ItsOverpaymentDetailsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "itsOverpayment", fetch=FetchType.EAGER)
+	@OneToMany(targetEntity = ItsOverpaymentDetailsEO.class, cascade = CascadeType.ALL, mappedBy = "itsOverpayment", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentDetailsEO> itsOverpaymentDtls;
 }
