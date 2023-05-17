@@ -52,14 +52,14 @@ public class ItsOverpaymentDetailsEO extends Auditable<String> implements Serial
 	@Column(name="ADD_COMP_PRG_DTL_ID")
 	private Long addCompPrgDtlId;
 	
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "OVP_ID")  
 	private ItsOverpaymentEO itsOverpayment;
 	
-	@OneToMany(targetEntity = ItsOverpaymentDistributionsEO.class, cascade = CascadeType.ALL, mappedBy = "ovpdtlsId", fetch=FetchType.EAGER)
+	@OneToMany(targetEntity = ItsOverpaymentDistributionsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ovpdtlsId", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentDistributionsEO> itsOverpaymentDstDtls;
 	
-	@OneToMany(targetEntity = ItsOverpaymentTransactionsEO.class, cascade = CascadeType.ALL, mappedBy = "ovpdtlsId", fetch=FetchType.EAGER)
+	@OneToMany(targetEntity = ItsOverpaymentTransactionsEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "ovpdtlsId", fetch=FetchType.EAGER)
 	private List<ItsOverpaymentTransactionsEO> itsOverpaymentTranDtls;
 	
 	@Transient

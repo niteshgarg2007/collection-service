@@ -36,7 +36,7 @@ public class OverpaymentController {
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
-	@Operation(summary = "Save overpayment and its related data to database.")
+	@Operation(summary = "Save/Update overpayment and its related data to database.")
 	@PostMapping("/addoverpayment")
 	public ItsOverpaymentVO addOverpayment(@RequestBody ItsOverpaymentVO itsOverpaymentVO) {
 		try {

@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.vo.ContextDataVO;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.StoredProcedureQuery;
 
 @Component
 public class CommonEntityManagerRepository {
@@ -94,5 +96,16 @@ public class CommonEntityManagerRepository {
 			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDDList method" +e.getMessage());
 		}
 		return vITSOverpaidWeeksUpdate;
+	}
+
+	public List<PITSRecoveryDstPercentageEO> getITSRecoveryDstPercentage(Long ovpdtlsId) {
+		try {    	   
+			StoredProcedureQuery query = entityManager.createNamedStoredProcedureQuery("P_ITS_RECOVERY_DST_PERCENTAGE");
+			query.setParameter("OVPDTLS_ID", ovpdtlsId);
+			return query.getResultList();
+		} catch(Exception e) {
+    	logger.error("Exception in CommonEntityManagerRepository while calling getITSRecoveryDstPercentage method");
+		throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getITSRecoveryDstPercentage method" +e.getMessage());
+		}
 	}
 }

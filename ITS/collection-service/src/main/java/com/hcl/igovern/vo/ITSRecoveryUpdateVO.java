@@ -11,7 +11,8 @@ public class ITSRecoveryUpdateVO {
 	private Long victimBadActorXrefId;
 	private Long badActorId;
 	private String badActorSsn;
-	private String prtytaxId;
+	private String prtyTaxId;
+	private Double ovpTotal;
 	private Double ovpBalance;
 	private Long recoveryId;
 	private String recoveryDate;
@@ -19,9 +20,10 @@ public class ITSRecoveryUpdateVO {
 	private String recoveryEffDate;
 	private Double totalPaymentAmount;
 	private Double totalRecoveryAmount;
-	private Long allOvpInd;
+	private String allOvpInd;
 	private String refundExcessId;
 	private String paymentMethod;
 	private Double paymentAmount;
 	private String comment;
+	private Double ovpBalanceCheck;
 }

@@ -16,31 +16,44 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hcl.igovern.entity.ITSRecoveryHistoryEO;
 import com.hcl.igovern.entity.ItsBadActorDetailsEO;
 import com.hcl.igovern.entity.ItsClaimantDetailsEO;
+import com.hcl.igovern.entity.ItsOverpaymentDetailsEO;
+import com.hcl.igovern.entity.ItsOverpaymentTransactionsEO;
+import com.hcl.igovern.entity.ItsOvpRecvDistributionsEO;
 import com.hcl.igovern.entity.ItsRecoveryDetailsEO;
 import com.hcl.igovern.entity.ItsRecoveryEO;
 import com.hcl.igovern.entity.ItsRefundsEO;
 import com.hcl.igovern.entity.ItsVictimBadActorXrefEO;
+import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
+import com.hcl.igovern.entity.VITSRecoveryProcessInputEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryUpdateEO;
+import com.hcl.igovern.entity.VITSRefundsDataEO;
 import com.hcl.igovern.exception.BusinessException;
+import com.hcl.igovern.repository.CommonEntityManagerRepository;
 import com.hcl.igovern.repository.ITSRecoveryHistoryRepository;
 import com.hcl.igovern.repository.ItsBadActorDetailsRepository;
 import com.hcl.igovern.repository.ItsClaimantDetailsRepository;
-import com.hcl.igovern.repository.ItsRecoveryDetailsRepository;
+import com.hcl.igovern.repository.ItsOvpRecvDistributionsRepository;
 import com.hcl.igovern.repository.ItsRecoveryRepository;
 import com.hcl.igovern.repository.ItsRefundsRepository;
 import com.hcl.igovern.repository.ItsVictimBadActorXrefRepository;
+import com.hcl.igovern.repository.OverpaymentDetailsRepository;
+import com.hcl.igovern.repository.OverpaymentTransactionsRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
 import com.hcl.igovern.repository.VITSRecoveryDetailsRepository;
+import com.hcl.igovern.repository.VITSRecoveryProcessInputRepository;
 import com.hcl.igovern.repository.VITSRecoveryUpdateRepository;
+import com.hcl.igovern.repository.VITSRefundsDataRepository;
 import com.hcl.igovern.service.RecoveryService;
 import com.hcl.igovern.util.DateUtil;
 import com.hcl.igovern.util.UIDateRoutines;
+import com.hcl.igovern.util.UIUtil;
 import com.hcl.igovern.vo.ContextDataVO;
-import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
+import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 
@@ -48,9 +61,6 @@ import com.hcl.igovern.vo.ItsRecoveryVO;
 public class RecoveryServiceImpl implements RecoveryService {
 	
 	Logger logger = LoggerFactory.getLogger(RecoveryServiceImpl.class);
-	
-	@Autowired
-	private VITSOvpSummaryRepository vITSOvpSummaryRepository;
 	
 	@Autowired
 	private ItsRecoveryRepository itsRecoveryRepository;
@@ -77,7 +87,25 @@ public class RecoveryServiceImpl implements RecoveryService {
 	private VITSRecoveryUpdateRepository vITSRecoveryUpdateRepository;
 	
 	@Autowired
-	private ItsRecoveryDetailsRepository itsRecoveryDetailsRepository;
+	private VITSRecoveryProcessInputRepository vITSRecoveryProcessInputRepository;
+	
+	@Autowired
+	private OverpaymentDetailsRepository overpaymentDetailsRepository;
+	
+	@Autowired
+	private OverpaymentTransactionsRepository overpaymentTransactionsRepository;
+	
+	@Autowired
+	private ItsOvpRecvDistributionsRepository itsOvpRecvDistributionsRepository;
+	
+	@Autowired
+    private CommonEntityManagerRepository commonEntityManagerRepository;
+	
+	@Autowired
+	private VITSOvpSummaryRepository vITSOvpSummaryRepository;
+	
+	@Autowired
+	private VITSRefundsDataRepository vITSRefundsDataRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -96,7 +124,6 @@ public class RecoveryServiceImpl implements RecoveryService {
 			if (itsRecoveryVO.getRecoveryId() != null) {
 				ItsRecoveryEO itsRecoveryEO = updateRecoveryDetailsData(itsRecoveryVO);
 				itsRecoveryRepository.save(itsRecoveryEO);
-				itsRecoveryRepository.flush();
 				itsRecoveryVO.setStatusMessage("Recovery has been successfully updated.");
 			}
 		} catch (Exception e) {
@@ -110,12 +137,9 @@ public class RecoveryServiceImpl implements RecoveryService {
 		List<ItsRecoveryDetailsEO> itsRecoveryDetailsList = null;
 		try {
 			ItsRecoveryEO itsRecoveryEOTemp = updateRecoveryObject(itsRecoveryVO);
-			if (itsRecoveryEOTemp.getItsRecoveryDtls() != null && !itsRecoveryEOTemp.getItsRecoveryDtls().isEmpty()) {
-				itsRecoveryDetailsRepository.deleteAll(itsRecoveryEOTemp.getItsRecoveryDtls());
-				itsRecoveryDetailsRepository.flush();
-				itsRecoveryDetailsList = populateItsRecoveryDetailsList(itsRecoveryEOTemp,itsRecoveryVO);
-				itsRecoveryEOTemp.setItsRecoveryDtls(itsRecoveryDetailsList);
-			}
+			itsRecoveryEOTemp.getItsRecoveryDtls().clear();
+			itsRecoveryDetailsList = populateItsRecoveryDetailsList(itsRecoveryEOTemp,itsRecoveryVO);
+			itsRecoveryEOTemp.getItsRecoveryDtls().addAll(itsRecoveryDetailsList);
 			return itsRecoveryEOTemp;
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.updateRecoveryDetailsData method");
@@ -135,11 +159,13 @@ public class RecoveryServiceImpl implements RecoveryService {
 				itsRecoveryEO.setRecoveryEffDate(DateUtil.strDateHyphenToTs(itsRecoveryVO.getRecoveryEffDate()));
 				itsRecoveryEO.setTotalPaymentAmount(itsRecoveryVO.getTotalPaymentAmount());
 				itsRecoveryEO.setTotalRecoveryAmount(itsRecoveryVO.getTotalRecoveryAmount());
-				if (itsRecoveryVO.getAllOvpInd() != null && itsRecoveryVO.getAllOvpInd().equalsIgnoreCase("true"))
+				if (itsRecoveryVO.getAllOvpInd() != null && (itsRecoveryVO.getAllOvpInd().equalsIgnoreCase("true") || 
+						itsRecoveryVO.getAllOvpInd().equalsIgnoreCase("Y")))
 					itsRecoveryEO.setAllOvpInd("Y");
 				else
 					itsRecoveryEO.setAllOvpInd(null);
-				if (itsRecoveryVO.getRefundExcessInd() != null && itsRecoveryVO.getRefundExcessInd().equalsIgnoreCase("true"))
+				if (itsRecoveryVO.getRefundExcessInd() != null && (itsRecoveryVO.getRefundExcessInd().equalsIgnoreCase("true") || 
+						itsRecoveryVO.getRefundExcessInd().equalsIgnoreCase("Y")))
 					itsRecoveryEO.setRefundExcessInd("Y");
 				else
 					itsRecoveryEO.setRefundExcessInd(null);
@@ -173,8 +199,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 			itsRecoveryDetailsList = populateItsRecoveryDetailsList(itsRecoveryEOTemp,itsRecoveryVO);
 			itsRecoveryEOTemp.setItsRecoveryDtls(itsRecoveryDetailsList);
 		} catch (Exception e) {
-			logger.error("Business Exception in OverpaymentServiceImpl createOverpaymentDetailsData method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.createOverpaymentDetailsData() method." + e.getMessage());
+			logger.error("Business Exception in RecoveryServiceImpl.createRecoveryDetailsData method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.createRecoveryDetailsData() method." + e.getMessage());
 		}
 		
 		return itsRecoveryEOTemp;
@@ -222,8 +248,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 	}
 
 	@Override
-	public List<ITSOvpSummaryVO> getOverpaymentDetailsList(ContextDataVO contextData) {
-		List<ITSOvpSummaryVO> itsOvpSummaryVOList = null;
+	public List<ITSRecoveryUpdateVO> getOverpaymentDetailsList(ContextDataVO contextData) {
+		List<ITSRecoveryUpdateVO> itsOvpSummaryVOList = null;
 		try {
 			if (contextData.getVictimBadActorXrefId() != null ) {
 				itsOvpSummaryVOList = getAssociatedVITSOvpSummaryList(contextData.getVictimBadActorXrefId());
@@ -240,19 +266,17 @@ public class RecoveryServiceImpl implements RecoveryService {
 		return itsOvpSummaryVOList;
 	}
 
-	private List<ITSOvpSummaryVO> getAssociatedVITSOvpSummaryList(Long victimBadActorXrefId) {
-		List<VITSOvpSummaryEO> vITSOvpSummaryEOList = null;
-		List<ITSOvpSummaryVO> itsOvpSummaryVOList = new ArrayList<>();
+	private List<ITSRecoveryUpdateVO> getAssociatedVITSOvpSummaryList(Long victimBadActorXrefId) {
+		List<VITSRecoveryUpdateEO> vITSRecoveryUpdateEOList = null;
+		List<ITSRecoveryUpdateVO> itsRecoveryUpdateVOList = new ArrayList<>();
 		try {
-			vITSOvpSummaryEOList = vITSOvpSummaryRepository.findByVictimBadActorXrefId(victimBadActorXrefId);
-			if (vITSOvpSummaryEOList != null && !vITSOvpSummaryEOList.isEmpty()) {
-				for (VITSOvpSummaryEO vITSOvpSummaryObj : vITSOvpSummaryEOList) {
-					if (vITSOvpSummaryObj != null && vITSOvpSummaryObj.getOvpBalance() > 0) {
-						ITSOvpSummaryVO itsOvpSummaryVOObj = new ITSOvpSummaryVO();
-						BeanUtils.copyProperties(vITSOvpSummaryObj, itsOvpSummaryVOObj);
-						itsOvpSummaryVOObj.setOvpCurrentBalance(vITSOvpSummaryObj.getOvpBalance());
-						itsOvpSummaryVOList.add(itsOvpSummaryVOObj);
-					}
+			vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.findByVictimBadActorXrefIdAndRecoveryIdIsNull(victimBadActorXrefId);
+			if (vITSRecoveryUpdateEOList != null && !vITSRecoveryUpdateEOList.isEmpty()) {
+				for (VITSRecoveryUpdateEO vITSRecoveryUpdateEOObj : vITSRecoveryUpdateEOList) {
+					ITSRecoveryUpdateVO itsRecoveryUpdateVOObj = new ITSRecoveryUpdateVO();
+					BeanUtils.copyProperties(vITSRecoveryUpdateEOObj, itsRecoveryUpdateVOObj);
+					itsRecoveryUpdateVOObj.setOvpBalanceCheck(vITSRecoveryUpdateEOObj.getOvpBalance());
+					itsRecoveryUpdateVOList.add(itsRecoveryUpdateVOObj);
 				}
 			}
 		} catch (BusinessException e) {
@@ -260,29 +284,27 @@ public class RecoveryServiceImpl implements RecoveryService {
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getAssociatedVITSOvpSummaryList() method." + e.getMessage());
 		}
 		
-		return itsOvpSummaryVOList;
+		return itsRecoveryUpdateVOList;
 	}
 	
-	private List<ITSOvpSummaryVO> getBadActorVITSOvpSummaryList(Long badActorId) {
-		List<VITSOvpSummaryEO> vITSOvpSummaryEOList = null;
-		List<ITSOvpSummaryVO> itsOvpSummaryVOList = new ArrayList<>();
+	private List<ITSRecoveryUpdateVO> getBadActorVITSOvpSummaryList(Long badActorId) {
+		List<VITSRecoveryUpdateEO> vITSRecoveryUpdateEOList = null;
+		List<ITSRecoveryUpdateVO> itsRecoveryUpdateVOList = new ArrayList<>();
 		try {
-			vITSOvpSummaryEOList = vITSOvpSummaryRepository.findByBadActorId(badActorId);
-			if (vITSOvpSummaryEOList != null && !vITSOvpSummaryEOList.isEmpty()) {
-				for (VITSOvpSummaryEO vITSOvpSummaryObj : vITSOvpSummaryEOList) {
-					if (vITSOvpSummaryObj != null && vITSOvpSummaryObj.getOvpBalance() > 0) {
-						ITSOvpSummaryVO itsOvpSummaryVOObj = new ITSOvpSummaryVO();
-						BeanUtils.copyProperties(vITSOvpSummaryObj, itsOvpSummaryVOObj);
-						itsOvpSummaryVOObj.setOvpCurrentBalance(vITSOvpSummaryObj.getOvpBalance());
-						itsOvpSummaryVOList.add(itsOvpSummaryVOObj);
-					}
+			vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.findByBadActorIdAndRecoveryIdIsNull(badActorId);
+			if (vITSRecoveryUpdateEOList != null && !vITSRecoveryUpdateEOList.isEmpty()) {
+				for (VITSRecoveryUpdateEO vITSRecoveryUpdateEOObj : vITSRecoveryUpdateEOList) {
+					ITSRecoveryUpdateVO itsRecoveryUpdateVOObj = new ITSRecoveryUpdateVO();
+					BeanUtils.copyProperties(vITSRecoveryUpdateEOObj, itsRecoveryUpdateVOObj);
+					itsRecoveryUpdateVOObj.setOvpBalanceCheck(vITSRecoveryUpdateEOObj.getOvpBalance());
+					itsRecoveryUpdateVOList.add(itsRecoveryUpdateVOObj);
 				}
 			}
 		} catch (BusinessException e) {
 			logger.error("Business Exception in RecoveryServiceImpl.getBadActorVITSOvpSummaryList method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getBadActorVITSOvpSummaryList() method." + e.getMessage());
 		}
-		return itsOvpSummaryVOList;
+		return itsRecoveryUpdateVOList;
 	}
 	
 	private void createPendingRefunds(ItsRecoveryEO itsRecoveryEO) {
@@ -292,7 +314,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 					itsRecoveryEO.getTotalRecoveryAmount() > itsRecoveryEO.getTotalPaymentAmount()) {
 				ItsRefundsEO itsRefundsEO = populateITSRefundsObject(itsRecoveryEO);
 				if (itsRefundsEO.getRefAmt() != null && itsRefundsEO.getRefAmt() >= 0 && itsRefundsEO.getRecoveryId() != null) {
-					//itsRefundsRepository.save(itsRefundsEO);
+					itsRefundsRepository.save(itsRefundsEO);
 				}
 			}
 		} catch (BusinessException e) {
@@ -354,6 +376,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 						BeanUtils.copyProperties(itsRecoveryHistoryEOObj, itsRecoveryHistoryVOObj);
 						itsRecoveryHistoryVOObj.setRecoveryDate(DateUtil.tsDateToStr(itsRecoveryHistoryEOObj.getRecoveryDate()));
 						itsRecoveryHistoryVOObj.setDateCreated(DateUtil.getStringDate(itsRecoveryHistoryEOObj.getDateCreated(),null));
+						itsRecoveryHistoryVOObj.setCreatedBy(itsRecoveryHistoryEOObj.getCreatedBy());
 						itsRecoveryHistoryVOList.add(itsRecoveryHistoryVOObj);
 					}
 				}
@@ -375,8 +398,6 @@ public class RecoveryServiceImpl implements RecoveryService {
 			if (itsRecoveryEOOpt.isPresent()) {
 				itsRecoveryEO = itsRecoveryEOOpt.get();
 				BeanUtils.copyProperties(itsRecoveryEO, itsRecoveryVO);
-//				itsRecoveryVO.setRecoveryDate(DateUtil.tsDateToStr(itsRecoveryEO.getRecoveryDate()));
-//				itsRecoveryVO.setRecoveryEffDate(DateUtil.tsDateToStr(itsRecoveryEO.getRecoveryEffDate()));
 				itsRecoveryVO.setRecoveryDate(itsRecoveryEO.getRecoveryDate()!=null?UIDateRoutines.getDateString(itsRecoveryEO.getRecoveryDate(),null):null);
 				itsRecoveryVO.setRecoveryEffDate(itsRecoveryEO.getRecoveryEffDate()!=null?UIDateRoutines.getDateString(itsRecoveryEO.getRecoveryEffDate(),null):null);
 			}
@@ -425,8 +446,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 					Optional<VITSOvpSummaryEO> vITSOvpSummaryEOOpt = vITSOvpSummaryRepository.findById(recoveryDtlsObj.getOvpId());
 					if (vITSOvpSummaryEOOpt.isPresent()) {
 						VITSOvpSummaryEO vITSOvpSummaryEO = vITSOvpSummaryEOOpt.get();
-						itsRecoveryDetailsVO.setTotalOvpAmount(vITSOvpSummaryEO.getOvpBalance());
-						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSOvpSummaryEO.getOvpBalance() - recoveryDtlsObj.getPaymentAmount());
+						itsRecoveryDetailsVO.setTotalOvpAmount(vITSOvpSummaryEO.getOvpTotal());
+						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSOvpSummaryEO.getOvpBalance());
 					}
 					itsRecoveryDetailsVO.setPaymentAmount(recoveryDtlsObj.getPaymentAmount());
 					itsRecoveryDetailsVO.setPaymentMethod(recoveryDtlsObj.getPaymentMethod());
@@ -528,18 +549,21 @@ public class RecoveryServiceImpl implements RecoveryService {
 		List<ItsRecoveryDetailsVO> itsRecoveryDetailsVOList = new ArrayList<>();
 		try {
 			if (contextDataVO.getRecoveryId() != null && contextDataVO.getVictimBadActorXrefId() != null) {
-				vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.findByVictimBadActorXrefId(contextDataVO.getVictimBadActorXrefId());
+				vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.getVITSRecoveryUpdateEOByXrefList(contextDataVO.getVictimBadActorXrefId(),contextDataVO.getRecoveryId());
 				if (vITSRecoveryUpdateEOList != null && !vITSRecoveryUpdateEOList.isEmpty()) {
 					for (VITSRecoveryUpdateEO vITSRecoveryUpdateEO : vITSRecoveryUpdateEOList) {
 						ItsRecoveryDetailsVO itsRecoveryDetailsVO = new ItsRecoveryDetailsVO();
 						itsRecoveryDetailsVO.setBadActorSsn(vITSRecoveryUpdateEO.getBadActorSsn());
-						itsRecoveryDetailsVO.setOriginalSsn(vITSRecoveryUpdateEO.getPrtytaxId());
+						itsRecoveryDetailsVO.setOriginalSsn(vITSRecoveryUpdateEO.getPrtyTaxId());
 						itsRecoveryDetailsVO.setOvpId(vITSRecoveryUpdateEO.getOvpId());
 						itsRecoveryDetailsVO.setTotalOvpAmount(vITSRecoveryUpdateEO.getOvpBalance());
+						if (vITSRecoveryUpdateEO.getPaymentAmount() == null)
+							vITSRecoveryUpdateEO.setPaymentAmount(0.00);
 						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSRecoveryUpdateEO.getOvpBalance() - vITSRecoveryUpdateEO.getPaymentAmount());
 						itsRecoveryDetailsVO.setPaymentAmount(vITSRecoveryUpdateEO.getPaymentAmount());
 						itsRecoveryDetailsVO.setPaymentMethod(vITSRecoveryUpdateEO.getPaymentMethod());
 						itsRecoveryDetailsVO.setComment(vITSRecoveryUpdateEO.getComment());
+						itsRecoveryDetailsVO.setOvpBalanceCheck(vITSRecoveryUpdateEO.getOvpBalance());
 						itsRecoveryDetailsVOList.add(itsRecoveryDetailsVO);
 					}
 				}
@@ -557,20 +581,21 @@ public class RecoveryServiceImpl implements RecoveryService {
 		List<ItsRecoveryDetailsVO> itsRecoveryDetailsVOList = new ArrayList<>();
 		try {
 			if (contextDataVO.getRecoveryId() != null && contextDataVO.getBadActorId() != null) {
-				vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.findByBadActorId(contextDataVO.getBadActorId());
+				vITSRecoveryUpdateEOList = vITSRecoveryUpdateRepository.getVITSRecoveryUpdateEOByBadActorList(contextDataVO.getBadActorId(),contextDataVO.getRecoveryId());
 				if (vITSRecoveryUpdateEOList != null && !vITSRecoveryUpdateEOList.isEmpty()) {
 					for (VITSRecoveryUpdateEO vITSRecoveryUpdateEO : vITSRecoveryUpdateEOList) {
 						ItsRecoveryDetailsVO itsRecoveryDetailsVO = new ItsRecoveryDetailsVO();
 						itsRecoveryDetailsVO.setBadActorSsn(vITSRecoveryUpdateEO.getBadActorSsn());
-						itsRecoveryDetailsVO.setOriginalSsn(vITSRecoveryUpdateEO.getPrtytaxId());
+						itsRecoveryDetailsVO.setOriginalSsn(vITSRecoveryUpdateEO.getPrtyTaxId());
 						itsRecoveryDetailsVO.setOvpId(vITSRecoveryUpdateEO.getOvpId());
-						itsRecoveryDetailsVO.setTotalOvpAmount(vITSRecoveryUpdateEO.getOvpBalance());
+						itsRecoveryDetailsVO.setTotalOvpAmount(vITSRecoveryUpdateEO.getOvpTotal());
 						if (vITSRecoveryUpdateEO.getPaymentAmount() == null)
 							vITSRecoveryUpdateEO.setPaymentAmount(0.00);
 						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSRecoveryUpdateEO.getOvpBalance() - vITSRecoveryUpdateEO.getPaymentAmount());
 						itsRecoveryDetailsVO.setPaymentAmount(vITSRecoveryUpdateEO.getPaymentAmount());
 						itsRecoveryDetailsVO.setPaymentMethod(vITSRecoveryUpdateEO.getPaymentMethod());
 						itsRecoveryDetailsVO.setComment(vITSRecoveryUpdateEO.getComment());
+						itsRecoveryDetailsVO.setOvpBalanceCheck(vITSRecoveryUpdateEO.getOvpBalance());
 						itsRecoveryDetailsVOList.add(itsRecoveryDetailsVO);
 					}
 				}
@@ -581,5 +606,153 @@ public class RecoveryServiceImpl implements RecoveryService {
 		}
 		
 		return itsRecoveryDetailsVOList;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
+	public ItsRecoveryVO processSelectedRecovery(Long recoveryId) {
+		ItsRecoveryVO itsRecoveryVO  = new ItsRecoveryVO();
+		ItsRecoveryEO itsRecoveryEO = null;
+		try {
+			Optional<ItsRecoveryEO> itsRecoveryEOOpt = itsRecoveryRepository.findById(recoveryId);
+			if (itsRecoveryEOOpt.isPresent()) {
+				itsRecoveryEO = itsRecoveryEOOpt.get();
+				itsRecoveryEO.setRecoveryStatus("Processed");
+				if (itsRecoveryEO.getItsRecoveryDtls() != null && !itsRecoveryEO.getItsRecoveryDtls().isEmpty()) {
+					populateRecoveryProcessData(itsRecoveryEO.getItsRecoveryDtls());
+				}
+				createPendingRefunds(itsRecoveryEO);
+				itsRecoveryRepository.save(itsRecoveryEO);
+				itsRecoveryVO.setStatusMessage("Recovery has been processed successfully.");
+			}
+		} catch (IllegalArgumentException ia) {
+			logger.error("Business Exception in RecoveryServiceImpl.processSelectedRecovery method");
+			throw new BusinessException("ERR_CODE1", "Given recovery Id is null, Please provide valid recovery Id." +ia.getMessage());
+		} catch (java.util.NoSuchElementException e) {
+			logger.error("Business Exception in RecoveryServiceImpl.processSelectedRecovery method");
+			throw new BusinessException("ERR_CODE2", "Given recovery Id does not exist in Database." +e.getMessage());
+		}
+		
+		return itsRecoveryVO;
+	}
+
+	private void populateRecoveryProcessData(List<ItsRecoveryDetailsEO> itsRecoveryDtls) {
+		try {
+			for (ItsRecoveryDetailsEO itsRecoveryDetailsEO : itsRecoveryDtls) {
+				applyRecovery(itsRecoveryDetailsEO);
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.populateRecoveryProcessData method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.populateRecoveryProcessData() method." + e.getMessage());
+		}
+	}
+
+	private void applyRecovery(ItsRecoveryDetailsEO itsRecoveryDetailsEO) {
+		try {
+			Double currentPaymentAmountBal = itsRecoveryDetailsEO.getPaymentAmount();
+			List<VITSRecoveryProcessInputEO> vITSRecoveryProcessInputEOList = vITSRecoveryProcessInputRepository.getRecoveryProcessInput(itsRecoveryDetailsEO.getOvpId());
+			if (vITSRecoveryProcessInputEOList != null && !vITSRecoveryProcessInputEOList.isEmpty()) {
+				for (VITSRecoveryProcessInputEO vITSRecoveryProcessInputEO : vITSRecoveryProcessInputEOList) {
+					if (currentPaymentAmountBal > 0) {
+						ItsOverpaymentTransactionsEO itsOvpTransObject = new ItsOverpaymentTransactionsEO();
+						if (currentPaymentAmountBal >= vITSRecoveryProcessInputEO.getOvpBalance()) {
+							itsOvpTransObject.setTransAmount(vITSRecoveryProcessInputEO.getOvpBalance() * -1);
+							currentPaymentAmountBal = currentPaymentAmountBal - vITSRecoveryProcessInputEO.getOvpBalance();
+						} else {
+							itsOvpTransObject.setTransAmount(currentPaymentAmountBal * -1);
+							currentPaymentAmountBal = 0.00;
+						}
+						itsOvpTransObject.setRecoveryDtlsId(itsRecoveryDetailsEO);
+						ItsOverpaymentDetailsEO itsOverpaymentDetailsEO = getOverpaymentDetails(vITSRecoveryProcessInputEO.getOvpdtlsId());
+						itsOvpTransObject.setOvpdtlsId(itsOverpaymentDetailsEO);
+						overpaymentTransactionsRepository.save(itsOvpTransObject);
+						saveOvpRecoveryDistribution(itsRecoveryDetailsEO,vITSRecoveryProcessInputEO,itsOvpTransObject);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.applyRecovery method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.applyRecovery() method." + e.getMessage());
+		}
+	}
+
+	private void saveOvpRecoveryDistribution(ItsRecoveryDetailsEO itsRecoveryDetailsEO, VITSRecoveryProcessInputEO vITSRecoveryProcessInputEO,
+			ItsOverpaymentTransactionsEO itsOvpTransObject) {
+		Double percent = 0.00;
+		try {
+			if (vITSRecoveryProcessInputEO != null && vITSRecoveryProcessInputEO.getOvptypCd().equalsIgnoreCase("S") && vITSRecoveryProcessInputEO.getCbwkBweDt() != null) {
+				//get over payment distribution details to distribute in each fund distributions
+				List<PITSRecoveryDstPercentageEO> pITSRecoveryDstPercentageEOList = commonEntityManagerRepository.getITSRecoveryDstPercentage(vITSRecoveryProcessInputEO.getOvpdtlsId());
+				if (pITSRecoveryDstPercentageEOList != null && !pITSRecoveryDstPercentageEOList.isEmpty()) {
+					for (PITSRecoveryDstPercentageEO recoveryDstPercentageEO : pITSRecoveryDstPercentageEOList) {
+						ItsOvpRecvDistributionsEO ovpRecvDistributionsEO = new ItsOvpRecvDistributionsEO();
+						ovpRecvDistributionsEO.setRecoveryDtlsId(itsRecoveryDetailsEO);
+						ItsOverpaymentDetailsEO itsOverpaymentDetailsEO = getOverpaymentDetails(vITSRecoveryProcessInputEO.getOvpdtlsId());
+						ovpRecvDistributionsEO.setOvpdtlsId(itsOverpaymentDetailsEO);
+						ovpRecvDistributionsEO.setPrgfndAcctNo(recoveryDstPercentageEO.getPrgfndAcctNo());
+						if (recoveryDstPercentageEO.getPrgfndAcctNo().equalsIgnoreCase("$UI_UI")) {
+							percent = Double.valueOf(UIUtil.roundDouble(recoveryDstPercentageEO.getMonPercentage(), 5));
+						} else {
+							percent = Double.valueOf(UIUtil.roundDown(recoveryDstPercentageEO.getMonPercentage(), 5));
+						}
+						ovpRecvDistributionsEO.setRecdstAmount(UIUtil.roundUp(itsOvpTransObject.getTransAmount().doubleValue() * percent.doubleValue(), 2));
+						itsOvpRecvDistributionsRepository.save(ovpRecvDistributionsEO);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.saveOvpRecoveryDistribution method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.saveOvpRecoveryDistribution() method." + e.getMessage());
+		}
+	}
+
+	private ItsOverpaymentDetailsEO getOverpaymentDetails(Long ovpdtlsId) {
+		ItsOverpaymentDetailsEO itsOverpaymentDetailsEO = null;
+		try {
+			Optional<ItsOverpaymentDetailsEO> itsOverpaymentDetailsEOOpt = overpaymentDetailsRepository.findById(ovpdtlsId);
+			if (itsOverpaymentDetailsEOOpt.isPresent()) {
+				itsOverpaymentDetailsEO = itsOverpaymentDetailsEOOpt.get();
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getOverpaymentDetails method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getOverpaymentDetails() method." + e.getMessage());
+		}
+		
+		return itsOverpaymentDetailsEO;
+	}
+
+	@Override
+	public List<ITSRefundsDataVO> getITSRefundsListList(Long badActorId) {
+		List<VITSRefundsDataEO> vITSRefundsDataEOList = null;
+		List<ITSRefundsDataVO> itsRefundsDataVOList = new ArrayList<>();
+		try {
+			vITSRefundsDataEOList = vITSRefundsDataRepository.findByBadActorId(badActorId);
+			if (vITSRefundsDataEOList != null && !vITSRefundsDataEOList.isEmpty()) {
+				for (VITSRefundsDataEO vITSRefundsDataEOObj : vITSRefundsDataEOList) {
+					ITSRefundsDataVO itsRefundsDataVOObj = new ITSRefundsDataVO();
+					BeanUtils.copyProperties(vITSRefundsDataEOObj, itsRefundsDataVOObj);
+					itsRefundsDataVOObj.setRefDspn(getRefundStatusDesc(vITSRefundsDataEOObj));
+					itsRefundsDataVOObj.setDateCreated(vITSRefundsDataEOObj.getDateCreated()!=null?UIDateRoutines.getDateString(vITSRefundsDataEOObj.getDateCreated(),null):null);
+					itsRefundsDataVOObj.setRefIssuedDate(vITSRefundsDataEOObj.getRefIssuedDate()!=null?UIDateRoutines.getDateString(vITSRefundsDataEOObj.getRefIssuedDate(),null):null);
+					itsRefundsDataVOList.add(itsRefundsDataVOObj);
+				}
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in RecoveryServiceImpl getITSRecoverySummaryList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getITSRecoverySummaryList() method." + e.getMessage());
+		}
+		
+		return itsRefundsDataVOList;
+	}
+
+	private String getRefundStatusDesc(VITSRefundsDataEO vITSRefundsDataEOObj) {
+		String refundStatusDesc = "";
+		if (vITSRefundsDataEOObj.getRefDspn().equalsIgnoreCase("P")) {
+			refundStatusDesc =  "Pending Refund";
+		}
+		if (vITSRefundsDataEOObj.getRefDspn().equalsIgnoreCase("I")) {
+			refundStatusDesc =  "Issued";
+		}
+		return refundStatusDesc;
 	}
 }

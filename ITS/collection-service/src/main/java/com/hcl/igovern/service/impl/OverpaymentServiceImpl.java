@@ -173,18 +173,18 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 			throw new BusinessException(ERR_CODE, "Cannot create a cancelled overpayment.");
 		}
 		try {
-			ItsOverpaymentEO itsOverpaymentEO = createOverpaymentDetailsData(itsOverpaymentVO);
-			// temporary added below condition to prevent over payment details data to update in the table, will remove
 			if (itsOverpaymentVO.getOvpId() == null) {
+				ItsOverpaymentEO itsOverpaymentEO = createOverpaymentDetailsData(itsOverpaymentVO);
 				if (!itsOverpaymentEO.getItsOverpaymentDtls().isEmpty()) {
 					itsOverpaymentEO = createOvpDstAndTransData(itsOverpaymentEO);
 				}
-			}
-			overpaymentRepository.save(itsOverpaymentEO);
-			if (itsOverpaymentVO.getOvpId() != null)
-				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully updated.");
-			else
+				overpaymentRepository.save(itsOverpaymentEO);
 				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully added.");
+			}
+			
+			if (itsOverpaymentVO.getOvpId() != null) {
+				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully updated.");
+			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl addOverpaymentAndDetails method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.addOverpaymentAndDetails() method." + e.getMessage());
@@ -204,47 +204,44 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 			itsOverpaymentTemp.setOvporgCd(itsOverpaymentVO.getOvporgCd());
 			itsOverpaymentTemp.setOvpId(itsOverpaymentVO.getOvpId());
 			itsOverpaymentTemp.setOvpdorgCd(itsOverpaymentVO.getOvpdorgCd());
-			// temporary added below condition to prevent over payment details data to update in the table, will remove
-			if (itsOverpaymentVO.getOvpId() == null) {
-				if (!itsOverpaymentVO.getItsOverpaymentDtls().isEmpty()) {
-					for (OverpaidWeeksVO overpaidWeeksTemp : itsOverpaymentVO.getItsOverpaymentDtls()) {
-						ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-						itsOverpaymentVO.setProgCode(overpaidWeeksTemp.getPrgmCd());
-						itsOvpDetails.setOvptypCd("S");
-						itsOvpDetails.setCbwkBweDt(DateUtil.strDateToTs(overpaidWeeksTemp.getCbwkBweDt()));
-						setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-						itsOvpDetails.setOvpAmt(overpaidWeeksTemp.getPaymentAmount());
-						itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-						itsOverpaymentDetailsList.add(itsOvpDetails);
-					}
-				}
-				if (itsOverpaymentVO.getPenalty() != null && itsOverpaymentVO.getPenalty() > 0) {
+			if (!itsOverpaymentVO.getItsOverpaymentDtls().isEmpty()) {
+				for (OverpaidWeeksVO overpaidWeeksTemp : itsOverpaymentVO.getItsOverpaymentDtls()) {
 					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-					itsOvpDetails.setOvptypCd("P");
-					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getPenalty());
+					itsOverpaymentVO.setProgCode(overpaidWeeksTemp.getPrgmCd());
+					itsOvpDetails.setOvptypCd("S");
+					itsOvpDetails.setCbwkBweDt(DateUtil.strDateToTs(overpaidWeeksTemp.getCbwkBweDt()));
 					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+					itsOvpDetails.setOvpAmt(overpaidWeeksTemp.getPaymentAmount());
 					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
 					itsOverpaymentDetailsList.add(itsOvpDetails);
 				}
-				if (itsOverpaymentVO.getInterest() != null && itsOverpaymentVO.getInterest() > 0) {
-					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-					itsOvpDetails.setOvptypCd("I");
-					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getInterest());
-					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-					itsOverpaymentDetailsList.add(itsOvpDetails);
-				}
-				if (itsOverpaymentVO.getCoc() != null && itsOverpaymentVO.getCoc() > 0) {
-					ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
-					itsOvpDetails.setOvptypCd("C");
-					itsOvpDetails.setOvpAmt(itsOverpaymentVO.getCoc());
-					setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
-					itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
-					itsOverpaymentDetailsList.add(itsOvpDetails);
-				}
-				
-				itsOverpaymentTemp.setItsOverpaymentDtls(itsOverpaymentDetailsList);
 			}
+			if (itsOverpaymentVO.getPenalty() != null && itsOverpaymentVO.getPenalty() > 0) {
+				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+				itsOvpDetails.setOvptypCd("P");
+				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getPenalty());
+				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+				itsOverpaymentDetailsList.add(itsOvpDetails);
+			}
+			if (itsOverpaymentVO.getInterest() != null && itsOverpaymentVO.getInterest() > 0) {
+				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+				itsOvpDetails.setOvptypCd("I");
+				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getInterest());
+				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+				itsOverpaymentDetailsList.add(itsOvpDetails);
+			}
+			if (itsOverpaymentVO.getCoc() != null && itsOverpaymentVO.getCoc() > 0) {
+				ItsOverpaymentDetailsEO itsOvpDetails = new ItsOverpaymentDetailsEO();
+				itsOvpDetails.setOvptypCd("C");
+				itsOvpDetails.setOvpAmt(itsOverpaymentVO.getCoc());
+				setClaimIdOrAddCompPrgDtlId(itsOverpaymentVO, itsOvpDetails);
+				itsOvpDetails.setItsOverpayment(itsOverpaymentTemp);
+				itsOverpaymentDetailsList.add(itsOvpDetails);
+			}
+			
+			itsOverpaymentTemp.setItsOverpaymentDtls(itsOverpaymentDetailsList);
 		
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl createOverpaymentDetailsData method");
