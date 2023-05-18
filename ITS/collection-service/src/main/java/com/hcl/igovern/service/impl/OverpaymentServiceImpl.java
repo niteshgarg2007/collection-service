@@ -3,6 +3,7 @@ package com.hcl.igovern.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -81,17 +82,20 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	public List<OverpaidWeeksVO> getProgramCodeDDList(Long victimBadActorXrefId) {
 		List<VITSOverpaidWeeksEO> programCodeEOList = null;
 		List<OverpaidWeeksVO> programCodeVOList = null;
-		OverpaidWeeksVO overpaidWeeksVO = null;
+		//OverpaidWeeksVO overpaidWeeksVO = null;
 		try {
 			logger.info("Starting to calling OverpaymentServiceImpl method");
 			programCodeEOList = commonEntityManagerRepository.getProgramCodeDDList(victimBadActorXrefId);
 			if (programCodeEOList != null && !programCodeEOList.isEmpty()) {
-				programCodeVOList = new ArrayList<>();
-				for (VITSOverpaidWeeksEO vITSOverpaidWeeks : programCodeEOList) {
-					overpaidWeeksVO = new OverpaidWeeksVO();
-					overpaidWeeksVO = convertEOToVO(vITSOverpaidWeeks, overpaidWeeksVO);
-					programCodeVOList.add(overpaidWeeksVO);
-				}
+//				programCodeVOList = new ArrayList<>();
+//				for (VITSOverpaidWeeksEO vITSOverpaidWeeks : programCodeEOList) {
+//					overpaidWeeksVO = new OverpaidWeeksVO();
+//					overpaidWeeksVO = convertEOToVO(vITSOverpaidWeeks, overpaidWeeksVO);
+//					programCodeVOList.add(overpaidWeeksVO);
+//				}
+				programCodeVOList = programCodeEOList.stream()
+						.map(vITSOverpaidWeeks -> convertEOToVO(vITSOverpaidWeeks, new OverpaidWeeksVO()))
+						.collect(Collectors.toList());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl getProgramCodeDDList method");
@@ -136,14 +140,16 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	
 	private OverpaidWeeksVO setFundCodeData(OverpaidWeeksVO overpaidWeeksVO, List<VITSOvpDistributionEO> vovpDdstList) {
 		String fundCode = "";
-		for (int i = 0; i < vovpDdstList.size(); i++) {
-			if (vovpDdstList.get(i) != null && vovpDdstList.get(i).getPrgfndAcctNo() != null) {
-				fundCode = fundCode.concat(vovpDdstList.get(i).getPrgfndAcctNo());
-				if (i < vovpDdstList.size() - 1) {
-					fundCode = fundCode.concat(",");
-				}
-			}
-		}
+//		for (int i = 0; i < vovpDdstList.size(); i++) {
+//			if (vovpDdstList.get(i) != null && vovpDdstList.get(i).getPrgfndAcctNo() != null) {
+//				fundCode = fundCode.concat(vovpDdstList.get(i).getPrgfndAcctNo());
+//				if (i < vovpDdstList.size() - 1) {
+//					fundCode = fundCode.concat(",");
+//				}
+//			}
+//		}
+		fundCode = vovpDdstList.stream().filter(prgm -> prgm != null && prgm.getPrgfndAcctNo() != null)
+				.map(s -> s.getPrgfndAcctNo()).collect(Collectors.joining(","));
 		overpaidWeeksVO.setFundCode(fundCode);
 		return overpaidWeeksVO;
 	}
@@ -399,22 +405,28 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	public List<OverpaidWeeksVO> getExistingOverpaidWeeksList(ContextDataVO contextData) {
 		List<VITSOverpaidWeeksUpdateEO> overpaidWeeksUpdateEOList = null;
 		List<OverpaidWeeksVO> overpaidWeeksVOList = null;
-		OverpaidWeeksVO overpaidWeeksVO = null;
+		//OverpaidWeeksVO overpaidWeeksVO = null;
 		try {
 			logger.info("Starting to calling OverpaymentServiceImpl.getExistingOverpaidWeeksList method");
 			overpaidWeeksUpdateEOList = vITSOverpaidWeeksUpdateRepository.
 					findByVictimBadActorXrefIdAndClmIdAndOvpIdOrderByCbwkBweDt(
 							contextData.getVictimBadActorXrefId(),contextData.getInputClaimId(),contextData.getOvpId());
 			if (overpaidWeeksUpdateEOList != null && !overpaidWeeksUpdateEOList.isEmpty()) {
-				overpaidWeeksVOList = new ArrayList<>();
-				for (VITSOverpaidWeeksUpdateEO vopweekUpdate : overpaidWeeksUpdateEOList) {
-					overpaidWeeksVO = new OverpaidWeeksVO();
-					if (vopweekUpdate != null && vopweekUpdate.getVictimBadActorXrefId() != null && vopweekUpdate.getCbwkBweDt() != null && 
-							vopweekUpdate.getClmId() != null) {
-						overpaidWeeksVO = populateOverpaidWeeksVO(vopweekUpdate, overpaidWeeksVO);
-					}
-					overpaidWeeksVOList.add(overpaidWeeksVO);
-				}
+//				overpaidWeeksVOList = new ArrayList<>();
+//				for (VITSOverpaidWeeksUpdateEO vopweekUpdate : overpaidWeeksUpdateEOList) {
+//					overpaidWeeksVO = new OverpaidWeeksVO();
+//					if (vopweekUpdate != null && vopweekUpdate.getVictimBadActorXrefId() != null && vopweekUpdate.getCbwkBweDt() != null && 
+//							vopweekUpdate.getClmId() != null) {
+//						overpaidWeeksVO = populateOverpaidWeeksVO(vopweekUpdate, overpaidWeeksVO);
+//					}
+//					overpaidWeeksVOList.add(overpaidWeeksVO);
+//				}
+				overpaidWeeksVOList = overpaidWeeksUpdateEOList.stream()
+						.filter(vopweekUpdate -> vopweekUpdate != null
+								&& vopweekUpdate.getVictimBadActorXrefId() != null
+								&& vopweekUpdate.getCbwkBweDt() != null && vopweekUpdate.getClmId() != null)
+						.map(vopweekUpdate -> populateOverpaidWeeksVO(vopweekUpdate, new OverpaidWeeksVO()))
+						.collect(Collectors.toList());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl getExistingOverpaidWeeksList method");
@@ -446,15 +458,17 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	}
 
 	private OverpaidWeeksVO setExistingFundCodeData(OverpaidWeeksVO overpaidWeeksVO, List<VITSOvpDistributionExistingEO> itsOvpDstsEOList) {
-		String fundCode = "";
-		for (int i = 0; i < itsOvpDstsEOList.size(); i++) {
-			if (itsOvpDstsEOList.get(i) != null && itsOvpDstsEOList.get(i).getPrgfndAcctNo() != null) {
-				fundCode = fundCode.concat(itsOvpDstsEOList.get(i).getPrgfndAcctNo());
-				if (i < itsOvpDstsEOList.size() - 1) {
-					fundCode = fundCode.concat(",");
-				}
-			}
-		}
+		//String fundCode = "";
+//		for (int i = 0; i < itsOvpDstsEOList.size(); i++) {
+//			if (itsOvpDstsEOList.get(i) != null && itsOvpDstsEOList.get(i).getPrgfndAcctNo() != null) {
+//				fundCode = fundCode.concat(itsOvpDstsEOList.get(i).getPrgfndAcctNo());
+//				if (i < itsOvpDstsEOList.size() - 1) {
+//					fundCode = fundCode.concat(",");
+//				}
+//			}
+//		}
+		String fundCode = itsOvpDstsEOList.stream().filter(prgm -> prgm != null && prgm.getPrgfndAcctNo() != null)
+				.map(s -> s.getPrgfndAcctNo()).collect(Collectors.joining(","));
 		overpaidWeeksVO.setFundCode(fundCode);
 		return overpaidWeeksVO;
 	}
@@ -463,22 +477,28 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	public List<OverpaidWeeksVO> getOverpaidWeeksUpdatedList(ContextDataVO contextData) {
 		List<VITSOverpaidWeeksUpdateEO> overpaidWeeksUpdateEOList = null;
 		List<OverpaidWeeksVO> overpaidWeeksVOList = null;
-		OverpaidWeeksVO overpaidWeeksVO = null;
+		//OverpaidWeeksVO overpaidWeeksVO = null;
 		try {
 			logger.info("Starting to calling OverpaymentServiceImpl.getExistingOverpaidWeeksList method");
 			overpaidWeeksUpdateEOList = vITSOverpaidWeeksUpdateRepository.
 					findByVictimBadActorXrefIdAndClmIdOrderByCbwkBweDt(
 							contextData.getVictimBadActorXrefId(),contextData.getInputClaimId());
 			if (overpaidWeeksUpdateEOList != null && !overpaidWeeksUpdateEOList.isEmpty()) {
-				overpaidWeeksVOList = new ArrayList<>();
-				for (VITSOverpaidWeeksUpdateEO vopweekUpdate : overpaidWeeksUpdateEOList) {
-					overpaidWeeksVO = new OverpaidWeeksVO();
-					if (vopweekUpdate != null && vopweekUpdate.getVictimBadActorXrefId() != null && vopweekUpdate.getCbwkBweDt() != null && 
-							vopweekUpdate.getClmId() != null) {
-						overpaidWeeksVO = populateOverpaidWeeksVO(vopweekUpdate, overpaidWeeksVO);
-					}
-					overpaidWeeksVOList.add(overpaidWeeksVO);
-				}
+//				overpaidWeeksVOList = new ArrayList<>();
+//				for (VITSOverpaidWeeksUpdateEO vopweekUpdate : overpaidWeeksUpdateEOList) {
+//					overpaidWeeksVO = new OverpaidWeeksVO();
+//					if (vopweekUpdate != null && vopweekUpdate.getVictimBadActorXrefId() != null && vopweekUpdate.getCbwkBweDt() != null && 
+//							vopweekUpdate.getClmId() != null) {
+//						overpaidWeeksVO = populateOverpaidWeeksVO(vopweekUpdate, overpaidWeeksVO);
+//					}
+//					overpaidWeeksVOList.add(overpaidWeeksVO);
+//				}
+				overpaidWeeksVOList = overpaidWeeksUpdateEOList.stream()
+						.filter(vopweekUpdate -> vopweekUpdate != null
+								&& vopweekUpdate.getVictimBadActorXrefId() != null
+								&& vopweekUpdate.getCbwkBweDt() != null && vopweekUpdate.getClmId() != null)
+						.map(vopweekUpdate -> populateOverpaidWeeksVO(vopweekUpdate, new OverpaidWeeksVO()))
+						.collect(Collectors.toList());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl getOverpaidWeeksUpdatedList method");
