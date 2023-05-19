@@ -18,4 +18,5 @@ public class ItsOverpaymentDetailsVO {
 	private Long clmId;
 	private Long addCompPrgDtlId;
 	private ItsOverpaymentEO itsOverpayment;
+	private String deleteInd;
 }

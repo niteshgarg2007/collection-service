@@ -52,6 +52,9 @@ public class ItsOverpaymentDetailsEO extends Auditable<String> implements Serial
 	@Column(name="ADD_COMP_PRG_DTL_ID")
 	private Long addCompPrgDtlId;
 	
+	@Column(name="DELETE_IND")
+	private String deleteInd;
+	
 	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "OVP_ID")  
 	private ItsOverpaymentEO itsOverpayment;

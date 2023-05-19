@@ -142,8 +142,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 			itsRecoveryEOTemp.getItsRecoveryDtls().addAll(itsRecoveryDetailsList);
 			return itsRecoveryEOTemp;
 		} catch (Exception e) {
-			logger.error("Business Exception in OverpaymentServiceImpl.updateRecoveryDetailsData method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.updateRecoveryDetailsData() method." + e.getMessage());
+			logger.error("Business Exception in RecoveryServiceImpl.updateRecoveryDetailsData method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.updateRecoveryDetailsData() method." + e.getMessage());
 		}
 	}
 
@@ -171,8 +171,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 					itsRecoveryEO.setRefundExcessInd(null);
 			}
 		} catch (Exception e) {
-			logger.error("Business Exception in OverpaymentServiceImpl.updateRecoveryObject method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.updateRecoveryObject() method." + e.getMessage());
+			logger.error("Business Exception in RecoveryServiceImpl.updateRecoveryObject method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.updateRecoveryObject() method." + e.getMessage());
 		}
 		
 		return itsRecoveryEO;
@@ -227,8 +227,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Business Exception in OverpaymentServiceImpl createOverpaymentDetailsData method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.createOverpaymentDetailsData() method." + e.getMessage());
+			logger.error("Business Exception in RecoveryServiceImpl createOverpaymentDetailsData method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.createOverpaymentDetailsData() method." + e.getMessage());
 		}
 		
 		return itsRecoveryDetailsList;
@@ -712,6 +712,9 @@ public class RecoveryServiceImpl implements RecoveryService {
 			Optional<ItsOverpaymentDetailsEO> itsOverpaymentDetailsEOOpt = overpaymentDetailsRepository.findById(ovpdtlsId);
 			if (itsOverpaymentDetailsEOOpt.isPresent()) {
 				itsOverpaymentDetailsEO = itsOverpaymentDetailsEOOpt.get();
+			}
+			if (itsOverpaymentDetailsEO == null) {
+				throw new BusinessException(ERR_CODE, "Cannot process recovery some problem occurred.");
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in RecoveryServiceImpl.getOverpaymentDetails method");

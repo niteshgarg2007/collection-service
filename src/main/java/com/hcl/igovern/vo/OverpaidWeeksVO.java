@@ -15,4 +15,5 @@ public class OverpaidWeeksVO {
 	private String fundCode;
 	private Long victimBadActorXrefId;
 	private Long ovpId;
+	private Long ovpdtlsId;
 }

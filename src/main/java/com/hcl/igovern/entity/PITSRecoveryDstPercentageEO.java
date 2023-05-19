@@ -29,8 +29,11 @@ public class PITSRecoveryDstPercentageEO {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)	
-	@Column(name = "OVPDST_ID")
-	private Long ovpdstId;
+	@Column(name = "SEQ_NO")
+	private Long seqNo;
+	
+	@Column(name = "OVPDTLS_ID")
+	private Long ovpdtlsId;
 	
 	@Column(name = "PRGFND_ACCT_NO")  
 	private String prgfndAcctNo;

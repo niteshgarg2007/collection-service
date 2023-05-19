@@ -11,5 +11,4 @@ import com.hcl.igovern.entity.ItsOverpaymentDetailsEO;
 public interface OverpaymentDetailsRepository extends JpaRepository<ItsOverpaymentDetailsEO, Long> {
 
 	ItsOverpaymentDetailsEO findByItsOverpaymentAndCbwkBweDtAndClmId(Long ovpId, Timestamp cbwkBweDt, Long clmId);
-
 }
