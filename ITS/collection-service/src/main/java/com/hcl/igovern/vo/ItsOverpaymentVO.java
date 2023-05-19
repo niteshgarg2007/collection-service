@@ -26,4 +26,5 @@ public class ItsOverpaymentVO {
 	private Long claimId; 
 	private String statusMessage;
 	private List<OverpaidWeeksVO> itsOverpaymentDtls;
+	private String validationErrorMessage;
 }

@@ -103,7 +103,7 @@ public class DateUtil {
 	public static Timestamp strDateToTs(String dateStr) {
 		Timestamp tsDate = null;
 
-		if (!dateStr.isBlank()) {
+		if (dateStr != null && !dateStr.isBlank()) {
 			StringTokenizer dateTokens = new StringTokenizer(dateStr, "/");
 			String mm = dateTokens.nextToken();
 			if (mm.length() == 1) {

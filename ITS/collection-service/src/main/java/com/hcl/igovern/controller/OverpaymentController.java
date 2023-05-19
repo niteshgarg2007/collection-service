@@ -41,9 +41,6 @@ public class OverpaymentController {
 	public ItsOverpaymentVO addOverpayment(@RequestBody ItsOverpaymentVO itsOverpaymentVO) {
 		try {
 			itsOverpaymentVO = overpaymentService.addOverpaymentAndDetails(itsOverpaymentVO);
-			if (itsOverpaymentVO != null && (itsOverpaymentVO.getStatusMessage() == null || itsOverpaymentVO.getStatusMessage().isEmpty())) {
-				throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method.");
-			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController.addOverpayment() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.addOverpayment() method." + be.getMessage());

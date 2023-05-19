@@ -33,9 +33,6 @@ public class VITSOverpaidWeeksUpdateEO implements Serializable {
 	@Column(name="PAYMENT_AMOUNT")
 	private Double paymentAmount;
 	
-	//@Column(name="RECOVERY_AMOUNT")
-	//private Double recoveryAmount;
-	
 	@Column(name="PRGM_CD")
 	private String prgmCd;
 	
@@ -44,4 +41,10 @@ public class VITSOverpaidWeeksUpdateEO implements Serializable {
 	
 	@Column(name="OVP_ID")
 	private Long ovpId;
+	
+	@Column(name="OVPDTLS_ID")
+	private Long ovpdtlsId;
+	
+	@Column(name="RECOVERY_AMOUNT")
+	private Double recoveryAmount;
 }

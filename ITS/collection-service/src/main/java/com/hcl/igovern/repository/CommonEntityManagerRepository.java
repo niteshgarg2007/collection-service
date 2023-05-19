@@ -13,7 +13,6 @@ import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.exception.BusinessException;
-import com.hcl.igovern.vo.ContextDataVO;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.StoredProcedureQuery;
@@ -35,9 +34,9 @@ public class CommonEntityManagerRepository {
 		String query=null;
         String sql=null;
 		try {
-			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS WHERE VICTIM_BAD_ACTOR_XREF_ID ="+victimBadActorXrefId;
+			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS WHERE VICTIM_BAD_ACTOR_XREF_ID =?";
 			sql = String.format(query);
-			vITSOverpaidWeeksListTemp = entityManager.createNativeQuery(sql).getResultList();
+			vITSOverpaidWeeksListTemp = entityManager.createNativeQuery(sql).setParameter(1, victimBadActorXrefId).getResultList();
 			if(vITSOverpaidWeeksListTemp!=null && !vITSOverpaidWeeksListTemp.isEmpty()) {
 				for (int i = 0; i < vITSOverpaidWeeksListTemp.size(); i++) {
 					vITSOverpaidWeeks = new VITSOverpaidWeeksEO();
@@ -62,17 +61,16 @@ public class CommonEntityManagerRepository {
 		return vITSOverpaidWeeksList;
 	}
 
-	public VITSOverpaidWeeksUpdateEO getExistingProgramCodeDD(ContextDataVO contextData) {
+	public VITSOverpaidWeeksUpdateEO getExistingProgramCodeDD(Long victimBadActorXrefId, Long ovpId) {
 		List<?> vITSOverpaidWeeksUpdateListTemp = null;
 		List<VITSOverpaidWeeksUpdateEO> vITSOverpaidWeeksExistingList = new ArrayList<>();
 		VITSOverpaidWeeksUpdateEO vITSOverpaidWeeksUpdate = null;
 		String query=null;
         String sql=null;
 		try {
-			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS_UPDATE "
-					+ " WHERE VICTIM_BAD_ACTOR_XREF_ID ="+contextData.getVictimBadActorXrefId() + " AND OVP_ID=" + contextData.getOvpId();
+			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS_UPDATE WHERE VICTIM_BAD_ACTOR_XREF_ID =? AND OVP_ID=?";
 			sql = String.format(query);
-			vITSOverpaidWeeksUpdateListTemp = entityManager.createNativeQuery(sql).getResultList();
+			vITSOverpaidWeeksUpdateListTemp = entityManager.createNativeQuery(sql).setParameter(1, victimBadActorXrefId).setParameter(2, ovpId).getResultList();
 			if(vITSOverpaidWeeksUpdateListTemp!=null && !vITSOverpaidWeeksUpdateListTemp.isEmpty()) {
 				for (int i = 0; i < vITSOverpaidWeeksUpdateListTemp.size(); i++) {
 					vITSOverpaidWeeksUpdate = new VITSOverpaidWeeksUpdateEO();
