@@ -776,13 +776,14 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 				overpaidWeeksVO.setPaymentAmount(vITSOverpaidWeeksExisting.getPaymentAmount());
 			if (vITSOverpaidWeeksExisting.getPrgmCd() != null)
 				overpaidWeeksVO.setPrgmCd(vITSOverpaidWeeksExisting.getPrgmCd());
-			if (vITSOverpaidWeeksExisting.getVictimBadActorXrefId() != null)
-				overpaidWeeksVO.setVictimBadActorXrefId(vITSOverpaidWeeksExisting.getVictimBadActorXrefId());
-			if (vITSOverpaidWeeksExisting.getOvpId() != null)
-				overpaidWeeksVO.setOvpId(vITSOverpaidWeeksExisting.getOvpId());
+			overpaidWeeksVO.setVictimBadActorXrefId(vITSOverpaidWeeksExisting.getVictimBadActorXrefId());
+			overpaidWeeksVO.setOvpId(vITSOverpaidWeeksExisting.getOvpId());
 			if (vITSOverpaidWeeksExisting.getOvpdtlsId() != null)
 				overpaidWeeksVO.setOvpdtlsId(vITSOverpaidWeeksExisting.getOvpdtlsId());
-			overpaidWeeksVO.setRecoveryAmount(vITSOverpaidWeeksExisting.getRecoveryAmount());
+			if (vITSOverpaidWeeksExisting.getRecoveryAmount() != null)
+				overpaidWeeksVO.setRecoveryAmount(vITSOverpaidWeeksExisting.getRecoveryAmount() * -1);
+			else
+				overpaidWeeksVO.setRecoveryAmount(0.00);
 		}
 		return overpaidWeeksVO;
 	}
