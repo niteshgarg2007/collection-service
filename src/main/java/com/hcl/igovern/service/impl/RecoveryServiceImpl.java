@@ -556,10 +556,10 @@ public class RecoveryServiceImpl implements RecoveryService {
 						itsRecoveryDetailsVO.setBadActorSsn(vITSRecoveryUpdateEO.getBadActorSsn());
 						itsRecoveryDetailsVO.setOriginalSsn(vITSRecoveryUpdateEO.getPrtyTaxId());
 						itsRecoveryDetailsVO.setOvpId(vITSRecoveryUpdateEO.getOvpId());
-						itsRecoveryDetailsVO.setTotalOvpAmount(vITSRecoveryUpdateEO.getOvpBalance());
+						itsRecoveryDetailsVO.setTotalOvpAmount(vITSRecoveryUpdateEO.getOvpTotal());
 						if (vITSRecoveryUpdateEO.getPaymentAmount() == null)
 							vITSRecoveryUpdateEO.setPaymentAmount(0.00);
-						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSRecoveryUpdateEO.getOvpBalance() - vITSRecoveryUpdateEO.getPaymentAmount());
+						itsRecoveryDetailsVO.setOvpCurrentBalance(vITSRecoveryUpdateEO.getOvpBalance());
 						itsRecoveryDetailsVO.setPaymentAmount(vITSRecoveryUpdateEO.getPaymentAmount());
 						itsRecoveryDetailsVO.setPaymentMethod(vITSRecoveryUpdateEO.getPaymentMethod());
 						itsRecoveryDetailsVO.setComment(vITSRecoveryUpdateEO.getComment());
