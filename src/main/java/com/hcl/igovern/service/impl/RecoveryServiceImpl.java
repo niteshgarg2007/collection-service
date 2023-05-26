@@ -375,7 +375,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 						ITSRecoveryHistoryVO itsRecoveryHistoryVOObj = new ITSRecoveryHistoryVO();
 						BeanUtils.copyProperties(itsRecoveryHistoryEOObj, itsRecoveryHistoryVOObj);
 						itsRecoveryHistoryVOObj.setRecoveryDate(DateUtil.tsDateToStr(itsRecoveryHistoryEOObj.getRecoveryDate()));
-						itsRecoveryHistoryVOObj.setDateCreated(DateUtil.getStringDate(itsRecoveryHistoryEOObj.getDateCreated(),null));
+						itsRecoveryHistoryVOObj.setDateCreated(UIDateRoutines.convertDateToString(itsRecoveryHistoryEOObj.getDateCreated()));
 						itsRecoveryHistoryVOObj.setCreatedBy(itsRecoveryHistoryEOObj.getCreatedBy());
 						itsRecoveryHistoryVOList.add(itsRecoveryHistoryVOObj);
 					}
@@ -398,8 +398,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 			if (itsRecoveryEOOpt.isPresent()) {
 				itsRecoveryEO = itsRecoveryEOOpt.get();
 				BeanUtils.copyProperties(itsRecoveryEO, itsRecoveryVO);
-				itsRecoveryVO.setRecoveryDate(itsRecoveryEO.getRecoveryDate()!=null?UIDateRoutines.getDateString(itsRecoveryEO.getRecoveryDate(),null):null);
-				itsRecoveryVO.setRecoveryEffDate(itsRecoveryEO.getRecoveryEffDate()!=null?UIDateRoutines.getDateString(itsRecoveryEO.getRecoveryEffDate(),null):null);
+				itsRecoveryVO.setRecoveryDate(UIDateRoutines.convertDateToString(itsRecoveryEO.getRecoveryDate()));
+				itsRecoveryVO.setRecoveryEffDate(UIDateRoutines.convertDateToString(itsRecoveryEO.getRecoveryEffDate()));
 			}
 		} catch (IllegalArgumentException ia) {
 			logger.error("Business Exception in RecoveryServiceImpl.getITSRecoveryDataByRecoveryId method");
@@ -735,8 +735,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 					ITSRefundsDataVO itsRefundsDataVOObj = new ITSRefundsDataVO();
 					BeanUtils.copyProperties(vITSRefundsDataEOObj, itsRefundsDataVOObj);
 					itsRefundsDataVOObj.setRefDspn(getRefundStatusDesc(vITSRefundsDataEOObj));
-					itsRefundsDataVOObj.setDateCreated(vITSRefundsDataEOObj.getDateCreated()!=null?UIDateRoutines.getDateString(vITSRefundsDataEOObj.getDateCreated(),null):null);
-					itsRefundsDataVOObj.setRefIssuedDate(vITSRefundsDataEOObj.getRefIssuedDate()!=null?UIDateRoutines.getDateString(vITSRefundsDataEOObj.getRefIssuedDate(),null):null);
+					itsRefundsDataVOObj.setDateCreated(UIDateRoutines.convertDateToString(vITSRefundsDataEOObj.getDateCreated()) );
+					itsRefundsDataVOObj.setRefIssuedDate(UIDateRoutines.convertDateToString(vITSRefundsDataEOObj.getRefIssuedDate()));
 					itsRefundsDataVOList.add(itsRefundsDataVOObj);
 				}
 			}
