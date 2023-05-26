@@ -733,7 +733,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		itsOverpaymentVO.setOvpId(vITSOverpaymentUpdateEO.getOvpId());
 		itsOverpaymentVO.setVictimBadActorXrefId(vITSOverpaymentUpdateEO.getVictimBadActorXrefId());
 		itsOverpaymentVO.setDateCreated(vITSOverpaymentUpdateEO.getDateCreated());
-		itsOverpaymentVO.setDateModified(UIDateRoutines.getSysdate()!=null?UIDateRoutines.getDateString(UIDateRoutines.getSysdate(),null):null);
+		itsOverpaymentVO.setDateModified(UIDateRoutines.getCurrentDateString());
 		itsOverpaymentVO.setOvpdisCd(vITSOverpaymentUpdateEO.getOvpdisCd());
 		itsOverpaymentVO.setOvpclsCd(vITSOverpaymentUpdateEO.getOvpclsCd());
 		itsOverpaymentVO.setOvpstsCd(vITSOverpaymentUpdateEO.getOvpstsCd());
