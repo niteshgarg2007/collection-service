@@ -44,4 +44,13 @@ public class VITSRecoverySummaryEO implements Serializable {
 	
 	@Column(name="APPLIED_AMOUNT")
 	private Double appliedAmount;
+	
+	@Column(name="DATE_CREATED")
+	private Timestamp dateCreated;
+	
+	@Column(name="BAD_ACTOR_NAME")
+	private String badActorName;
+	
+	@Column(name="BAD_ACTOR_SSN")
+	private String badActorSsn;
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
 
 import com.hcl.igovern.entity.ItsOverpaymentDetailsEO;
 import com.hcl.igovern.entity.ItsOverpaymentDistributionsEO;
@@ -23,6 +23,7 @@ import com.hcl.igovern.entity.ItsRecoveryDetailsEO;
 import com.hcl.igovern.entity.VITSDistributionReversalEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
+import com.hcl.igovern.entity.VITSOverpaymentDetailsEO;
 import com.hcl.igovern.entity.VITSOverpaymentUpdateEO;
 import com.hcl.igovern.entity.VITSOvpDistributionEO;
 import com.hcl.igovern.entity.VITSOvpRecvDstReversalEO;
@@ -41,6 +42,7 @@ import com.hcl.igovern.repository.OverpaymentTransactionsRepository;
 import com.hcl.igovern.repository.VITSDistributionReversalRepository;
 import com.hcl.igovern.repository.VITSOverpaidWeeksRepository;
 import com.hcl.igovern.repository.VITSOverpaidWeeksUpdateRepository;
+import com.hcl.igovern.repository.VITSOverpaymentDetailsRepository;
 import com.hcl.igovern.repository.VITSOverpaymentUpdateRepository;
 import com.hcl.igovern.repository.VITSOvpDistributionRepository;
 import com.hcl.igovern.repository.VITSOvpRecvDstReversalRepository;
@@ -50,11 +52,12 @@ import com.hcl.igovern.repository.VITSRecoveryStatusRepository;
 import com.hcl.igovern.repository.VITSTransactionReversalRepository;
 import com.hcl.igovern.service.OverpaymentService;
 import com.hcl.igovern.util.DateUtil;
-import com.hcl.igovern.util.UIDateRoutines;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
+import com.hcl.igovern.vo.ITSOvpsearchDetailsVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.OverpaidWeeksVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 
 @Service
@@ -112,6 +115,9 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	
 	@Autowired
 	private VITSRecoveryStatusRepository vITSRecoveryStatusRepository;
+	
+	@Autowired
+	private VITSOverpaymentDetailsRepository vITSOverpaymentDetailsRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -198,11 +204,11 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	public ItsOverpaymentVO addOverpaymentAndDetails(ItsOverpaymentVO itsOverpaymentVO) {
 		if (itsOverpaymentVO.getItsOverpaymentDtls().isEmpty())
 			throw new BusinessException(ERR_CODE, "Please select at-least one Overpaid Weeks");
-		if ("C".equalsIgnoreCase(itsOverpaymentVO.getOvpdisCd()) || "CAN".equalsIgnoreCase(itsOverpaymentVO.getOvpstsCd())) {
-			throw new BusinessException(ERR_CODE, "Cannot create a cancelled overpayment.");
-		}
 		try {
 			if (itsOverpaymentVO.getOvpId() == null) {
+				if ("C".equalsIgnoreCase(itsOverpaymentVO.getOvpdisCd()) || "CAN".equalsIgnoreCase(itsOverpaymentVO.getOvpstsCd())) {
+					throw new BusinessException(ERR_CODE, "Cannot create a cancelled overpayment.");
+				}
 				ItsOverpaymentEO itsOverpaymentEO = createOverpaymentDetailsData(itsOverpaymentVO);
 				if (!itsOverpaymentEO.getItsOverpaymentDtls().isEmpty()) {
 					itsOverpaymentEO = createOvpDstAndTransData(itsOverpaymentEO);
@@ -733,7 +739,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		itsOverpaymentVO.setOvpId(vITSOverpaymentUpdateEO.getOvpId());
 		itsOverpaymentVO.setVictimBadActorXrefId(vITSOverpaymentUpdateEO.getVictimBadActorXrefId());
 		itsOverpaymentVO.setDateCreated(vITSOverpaymentUpdateEO.getDateCreated());
-		itsOverpaymentVO.setDateModified(UIDateRoutines.getCurrentDateString());
+		itsOverpaymentVO.setDateModified(DateUtil.getCurrentDateString());
 		itsOverpaymentVO.setOvpdisCd(vITSOverpaymentUpdateEO.getOvpdisCd());
 		itsOverpaymentVO.setOvpclsCd(vITSOverpaymentUpdateEO.getOvpclsCd());
 		itsOverpaymentVO.setOvpstsCd(vITSOverpaymentUpdateEO.getOvpstsCd());
@@ -873,6 +879,68 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		} catch (BusinessException e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.getITSOverpaymentStatusHistoryList method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getITSOverpaymentStatusHistoryList() method." + e.getMessage());
+		}
+		
+		return itsOvpSummaryVOList;
+	}
+
+	@Override
+	public List<ITSOvpSummaryVO> getOvpSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
+		List<VITSOvpSummaryEO> vITSOvpSummaryEOList = null;
+		List<ITSOvpSummaryVO> itsOvpSummaryVOList = new ArrayList<>();
+		try {
+			vITSOvpSummaryEOList = commonEntityManagerRepository.getOvpSearchBadActorData(searchBadActorDataVO);
+			if (vITSOvpSummaryEOList != null && !vITSOvpSummaryEOList.isEmpty()) {
+				itsOvpSummaryVOList = vITSOvpSummaryEOList.stream().map(vItsOvpSummaryEO -> {
+					ITSOvpSummaryVO itsOvpSummaryVO = new ITSOvpSummaryVO();
+					BeanUtils.copyProperties(vItsOvpSummaryEO, itsOvpSummaryVO);
+					itsOvpSummaryVO.setDateCreated(DateUtil.convertDateToString(vItsOvpSummaryEO.getDateCreated()));
+					itsOvpSummaryVO.setRecoveryAmount(vItsOvpSummaryEO.getRecoveryAmount() * -1);
+					itsOvpSummaryVO.setCostCode(getCostCodeMapping(vItsOvpSummaryEO));
+					return itsOvpSummaryVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in commonEntityManagerRepository.getOvpSearchBadActorData method");
+			throw new BusinessException(ERR_CODE,
+					"Something went wrong in commonEntityManagerRepository.getOvpSearchBadActorData() method."
+							+ e.getMessage());
+		}
+		return itsOvpSummaryVOList;
+	}
+
+	private String getCostCodeMapping(VITSOvpSummaryEO itsOvpSummaryEO) {
+		String costCodeStr = "";
+		try {
+			List<String> costCodeList = commonEntityManagerRepository.getCostCodeMapping(itsOvpSummaryEO.getOvpId());
+			if (costCodeList != null && !costCodeList.isEmpty()) {
+				costCodeStr = costCodeList.stream().map(e -> e).collect(Collectors.joining(","));
+			}
+			return costCodeStr;
+		} catch (BusinessException e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.getCostCode method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getCostCode() method." + e.getMessage());
+		}
+	}
+
+	@Override
+	public List<ITSOvpsearchDetailsVO> getITSOverpaymentDetailsList(Long selectedOverpaymentId) {
+		List<VITSOverpaymentDetailsEO> vITSOverpaymentDetailsEOList = null;
+		List<ITSOvpsearchDetailsVO> itsOvpSummaryVOList = new ArrayList<>();
+		try {
+			vITSOverpaymentDetailsEOList = vITSOverpaymentDetailsRepository.findByOvpIdAndOvptypCd(selectedOverpaymentId,"S");
+			if (vITSOverpaymentDetailsEOList != null && !vITSOverpaymentDetailsEOList.isEmpty()) {
+				itsOvpSummaryVOList = vITSOverpaymentDetailsEOList.stream().map(vITSOverpaymentDetailsEO -> {
+					ITSOvpsearchDetailsVO itsOvpsearchDetailsVO = new ITSOvpsearchDetailsVO();
+					BeanUtils.copyProperties(vITSOverpaymentDetailsEO, itsOvpsearchDetailsVO);
+					itsOvpsearchDetailsVO.setCbwkBweDt(DateUtil.convertDateToString(vITSOverpaymentDetailsEO.getCbwkBweDt()));
+					itsOvpsearchDetailsVO.setRecoveryAmt(vITSOverpaymentDetailsEO.getRecoveryAmt() * -1);
+					return itsOvpsearchDetailsVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.getITSOverpaymentDetailsList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getITSOverpaymentDetailsList() method." + e.getMessage());
 		}
 		
 		return itsOvpSummaryVOList;

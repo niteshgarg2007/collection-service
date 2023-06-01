@@ -1,6 +1,7 @@
 package com.hcl.igovern.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -73,4 +74,10 @@ public class VITSOvpSummaryEO implements Serializable {
 	
 	@Column(name="PRTY_TAX_ID")
 	private String prtyTaxId;
+	
+	@Column(name="DATE_CREATED")
+	private Timestamp dateCreated;
+	
+	@Column(name="BAD_ACTOR_NAME")
+	private String badActorName;
 }

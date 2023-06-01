@@ -18,8 +18,10 @@ import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.OverpaymentService;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
+import com.hcl.igovern.vo.ITSOvpsearchDetailsVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.OverpaidWeeksVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -173,6 +175,30 @@ public class OverpaymentController {
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController.getITSOverpaymentStatusHistoryList() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getITSOverpaymentStatusHistoryList() method." + be.getMessage());
+		}
+		
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve bad actor overpayment data")
+	@PostMapping("/overpaymentbadactorsearch")
+	public List<ITSOvpSummaryVO> getOvpSearchBadActorData(@RequestBody SearchBadActorDataVO searchBadActorDataVO ) {
+		logger.info("Starting to calling getITSOverpaymentStatusHistoryList method"); 
+		return overpaymentService.getOvpSearchBadActorData(searchBadActorDataVO);			
+	}
+	
+	@Operation(summary = "Retrieve overpayment search details list for the selected overpayment id.")
+	@GetMapping("/overpaymentdetailslist/{selectedOverpaymentId}")
+	public List<ITSOvpsearchDetailsVO> getITSOverpaymentDetailsList(@PathVariable Long selectedOverpaymentId) {
+		logger.info("Starting to calling getITSOverpaymentDetailsList method");
+		List<ITSOvpsearchDetailsVO> list = null;
+		try {
+			if (selectedOverpaymentId != null) {
+				list = overpaymentService.getITSOverpaymentDetailsList(selectedOverpaymentId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in OverpaymentController.getITSOverpaymentDetailsList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentController.getITSOverpaymentDetailsList() method." + be.getMessage());
 		}
 		
 		return list;
