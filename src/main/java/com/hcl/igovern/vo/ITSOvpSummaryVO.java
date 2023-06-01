@@ -29,4 +29,6 @@ public class ITSOvpSummaryVO {
 	private String badActorSsn;
 	private String prtyTaxId;
 	private Double ovpCurrentBalance;
+	private String badActorName;
+	private String costCode;
 }

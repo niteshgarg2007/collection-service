@@ -7,9 +7,11 @@ import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
+import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
 import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 public interface RecoveryService {
 
@@ -30,5 +32,9 @@ public interface RecoveryService {
 	ItsRecoveryVO processSelectedRecovery(Long recoveryId);
 
 	List<ITSRefundsDataVO> getITSRefundsListList(Long badActorId);
+
+	List<ITSRecoverySummaryVO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO);
+
+	List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(Long selectedRecoveryId);
 
 }

@@ -3,7 +3,9 @@ package com.hcl.igovern.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +30,7 @@ import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryProcessInputEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryUpdateEO;
+import com.hcl.igovern.entity.VITSRecovsearchDetailsEO;
 import com.hcl.igovern.entity.VITSRefundsDataEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.CommonEntityManagerRepository;
@@ -44,18 +47,20 @@ import com.hcl.igovern.repository.VITSOvpSummaryRepository;
 import com.hcl.igovern.repository.VITSRecoveryDetailsRepository;
 import com.hcl.igovern.repository.VITSRecoveryProcessInputRepository;
 import com.hcl.igovern.repository.VITSRecoveryUpdateRepository;
+import com.hcl.igovern.repository.VITSRecovsearchDetailsRepository;
 import com.hcl.igovern.repository.VITSRefundsDataRepository;
 import com.hcl.igovern.service.RecoveryService;
 import com.hcl.igovern.util.DateUtil;
-import com.hcl.igovern.util.UIDateRoutines;
 import com.hcl.igovern.util.UIUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
+import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
 import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 @Service
 public class RecoveryServiceImpl implements RecoveryService {
@@ -106,6 +111,9 @@ public class RecoveryServiceImpl implements RecoveryService {
 	
 	@Autowired
 	private VITSRefundsDataRepository vITSRefundsDataRepository;
+	
+	@Autowired
+	private VITSRecovsearchDetailsRepository vITSRecovsearchDetailsRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -183,7 +191,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 		List<ItsRecoveryDetailsEO> itsRecoveryDetailsList = null;
 		try {
 			itsRecoveryEOTemp.setBadActorId(itsRecoveryVO.getBadActorId());
-			itsRecoveryEOTemp.setRecoveryDate(DateUtil.strDateToTs(itsRecoveryVO.getRecoveryDate()));
+			//itsRecoveryEOTemp.setRecoveryDate(DateUtil.strDateToTs(itsRecoveryVO.getRecoveryDate()));
+			itsRecoveryEOTemp.setRecoveryDate(DateUtil.parseDateTime(DateUtil.getCurrentDateString()));
 			itsRecoveryEOTemp.setRecoveryStatus("Closed");
 			itsRecoveryEOTemp.setRecoveryEffDate(DateUtil.strDateHyphenToTs(itsRecoveryVO.getRecoveryEffDate()));
 			itsRecoveryEOTemp.setTotalPaymentAmount(itsRecoveryVO.getTotalPaymentAmount());
@@ -375,7 +384,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 						ITSRecoveryHistoryVO itsRecoveryHistoryVOObj = new ITSRecoveryHistoryVO();
 						BeanUtils.copyProperties(itsRecoveryHistoryEOObj, itsRecoveryHistoryVOObj);
 						itsRecoveryHistoryVOObj.setRecoveryDate(DateUtil.tsDateToStr(itsRecoveryHistoryEOObj.getRecoveryDate()));
-						itsRecoveryHistoryVOObj.setDateCreated(UIDateRoutines.convertDateToString(itsRecoveryHistoryEOObj.getDateCreated()));
+						itsRecoveryHistoryVOObj.setDateCreated(DateUtil.convertDateToString(itsRecoveryHistoryEOObj.getDateCreated()));
 						itsRecoveryHistoryVOObj.setCreatedBy(itsRecoveryHistoryEOObj.getCreatedBy());
 						itsRecoveryHistoryVOList.add(itsRecoveryHistoryVOObj);
 					}
@@ -398,8 +407,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 			if (itsRecoveryEOOpt.isPresent()) {
 				itsRecoveryEO = itsRecoveryEOOpt.get();
 				BeanUtils.copyProperties(itsRecoveryEO, itsRecoveryVO);
-				itsRecoveryVO.setRecoveryDate(UIDateRoutines.convertDateToString(itsRecoveryEO.getRecoveryDate()));
-				itsRecoveryVO.setRecoveryEffDate(UIDateRoutines.convertDateToString(itsRecoveryEO.getRecoveryEffDate()));
+				itsRecoveryVO.setRecoveryDate(DateUtil.convertDateToString(itsRecoveryEO.getRecoveryDate()));
+				itsRecoveryVO.setRecoveryEffDate(DateUtil.convertDateToString(itsRecoveryEO.getRecoveryEffDate()));
 			}
 		} catch (IllegalArgumentException ia) {
 			logger.error("Business Exception in RecoveryServiceImpl.getITSRecoveryDataByRecoveryId method");
@@ -735,8 +744,8 @@ public class RecoveryServiceImpl implements RecoveryService {
 					ITSRefundsDataVO itsRefundsDataVOObj = new ITSRefundsDataVO();
 					BeanUtils.copyProperties(vITSRefundsDataEOObj, itsRefundsDataVOObj);
 					itsRefundsDataVOObj.setRefDspn(getRefundStatusDesc(vITSRefundsDataEOObj));
-					itsRefundsDataVOObj.setDateCreated(UIDateRoutines.convertDateToString(vITSRefundsDataEOObj.getDateCreated()) );
-					itsRefundsDataVOObj.setRefIssuedDate(UIDateRoutines.convertDateToString(vITSRefundsDataEOObj.getRefIssuedDate()));
+					itsRefundsDataVOObj.setDateCreated(DateUtil.convertDateToString(vITSRefundsDataEOObj.getDateCreated()) );
+					itsRefundsDataVOObj.setRefIssuedDate(DateUtil.convertDateToString(vITSRefundsDataEOObj.getRefIssuedDate()));
 					itsRefundsDataVOList.add(itsRefundsDataVOObj);
 				}
 			}
@@ -757,5 +766,58 @@ public class RecoveryServiceImpl implements RecoveryService {
 			refundStatusDesc =  "Issued";
 		}
 		return refundStatusDesc;
+	}
+
+	@Override
+	public List<ITSRecoverySummaryVO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
+
+		List<VITSRecoverySummaryEO> vITSRecoverySummaryEOList = null;
+		List<ITSRecoverySummaryVO> itsRecoverySummaryVOList = new ArrayList<>();
+		try {
+			vITSRecoverySummaryEOList = commonEntityManagerRepository.getRecovSearchBadActorData(searchBadActorDataVO);
+			if (vITSRecoverySummaryEOList != null && !vITSRecoverySummaryEOList.isEmpty()) {
+				itsRecoverySummaryVOList = vITSRecoverySummaryEOList.stream().map(vITSRecoverySummaryEO -> {
+					ITSRecoverySummaryVO itsRecoverySummaryVO = new ITSRecoverySummaryVO();
+					BeanUtils.copyProperties(vITSRecoverySummaryEO, itsRecoverySummaryVO);
+					itsRecoverySummaryVO.setRecoveryDate(DateUtil.convertDateToString(vITSRecoverySummaryEO.getRecoveryDate()));
+					itsRecoverySummaryVO.setRecoveryEffDate(DateUtil.convertDateToString(vITSRecoverySummaryEO.getRecoveryEffDate()));
+					return itsRecoverySummaryVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getRecovSearchBadActorData method");
+			throw new BusinessException(ERR_CODE,
+					"Something went wrong in RecoveryServiceImpl.getRecovSearchBadActorData() method."
+							+ e.getMessage());
+		}
+		return itsRecoverySummaryVOList;
+	
+	}
+
+	@Override
+	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(Long selectedRecoveryId) {
+		List<VITSRecovsearchDetailsEO> vITSRecovsearchDetailsEOList = null;
+		List<ITSRecovsearchDetailsVO> itsRecovsearchDetailsVOList = new ArrayList<>();
+		try {
+			vITSRecovsearchDetailsEOList = vITSRecovsearchDetailsRepository.findByRecoveryId(selectedRecoveryId);
+			if (vITSRecovsearchDetailsEOList != null && !vITSRecovsearchDetailsEOList.isEmpty()) {
+				itsRecovsearchDetailsVOList = vITSRecovsearchDetailsEOList.stream().map(vITSRecovsearchDetailsEO -> {
+					ITSRecovsearchDetailsVO itsRecovsearchDetailsVO = new ITSRecovsearchDetailsVO();
+					BeanUtils.copyProperties(vITSRecovsearchDetailsEO, itsRecovsearchDetailsVO);
+					if (StringUtils.isNotBlank(itsRecovsearchDetailsVO.getPaymentMethod()) && "C".equals(itsRecovsearchDetailsVO.getPaymentMethod())) {
+						itsRecovsearchDetailsVO.setPaymentMethod("Cash");
+					}
+					if (StringUtils.isNotBlank(itsRecovsearchDetailsVO.getPaymentMethod()) && "H".equals(itsRecovsearchDetailsVO.getPaymentMethod())) {
+						itsRecovsearchDetailsVO.setPaymentMethod("Check");
+					}
+					return itsRecovsearchDetailsVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in RecoveryServiceImpl.getITSRecoveryDetailsList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getITSRecoveryDetailsList() method." + e.getMessage());
+		}
+		
+		return itsRecovsearchDetailsVOList;
 	}
 }

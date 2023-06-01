@@ -20,9 +20,11 @@ import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
+import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
 import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -180,6 +182,30 @@ public class RecoveryController {
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRefundsListList() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRefundsListList() method." + be.getMessage());
+		}
+		
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve bad actor recovery data")
+	@PostMapping("/recoverybadactorsearch")
+	public List<ITSRecoverySummaryVO> getRecovSearchBadActorData(@RequestBody SearchBadActorDataVO searchBadActorDataVO ) {
+		logger.info("Starting to calling getRecovSearchBadActorData method"); 
+		return recoveryService.getRecovSearchBadActorData(searchBadActorDataVO);			
+	}
+	
+	@Operation(summary = "Retrieve recovery search details list for the selected recovery id.")
+	@GetMapping("/recoverySearchdetailslist/{selectedRecoveryId}")
+	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(@PathVariable Long selectedRecoveryId) {
+		logger.info("Starting to calling getITSRecoveryDetailsList method");
+		List<ITSRecovsearchDetailsVO> list = null;
+		try {
+			if (selectedRecoveryId != null) {
+				list = recoveryService.getITSRecoveryDetailsList(selectedRecoveryId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getITSRecoveryDetailsList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRecoveryDetailsList() method." + be.getMessage());
 		}
 		
 		return list;

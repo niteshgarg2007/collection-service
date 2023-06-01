@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
+import com.hcl.igovern.vo.ITSOvpsearchDetailsVO;
 import com.hcl.igovern.vo.ItsOverpaymentVO;
 import com.hcl.igovern.vo.OverpaidWeeksVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 public interface OverpaymentService {
 
@@ -26,4 +28,8 @@ public interface OverpaymentService {
 	List<OverpaidWeeksVO> getOverpaidWeeksUpdatedList(ContextDataVO contextData);
 
 	List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(Long selectedOverpaymentId);
+
+	List<ITSOvpSummaryVO> getOvpSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO);
+
+	List<ITSOvpsearchDetailsVO> getITSOverpaymentDetailsList(Long selectedOverpaymentId);
 }

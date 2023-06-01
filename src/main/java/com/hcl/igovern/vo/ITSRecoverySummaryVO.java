@@ -1,5 +1,6 @@
 package com.hcl.igovern.vo;
 
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,4 +16,7 @@ public class ITSRecoverySummaryVO {
 	private String recoveryStatus;
 	private Double totalRecoveryAmount;
 	private Double appliedAmount;
+	private String dateCreated;
+	private String badActorName;
+	private String badActorSsn;
 }
