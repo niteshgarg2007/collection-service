@@ -20,6 +20,9 @@ public class VITSTransactionReversalEO implements Serializable {
 	private static final long serialVersionUID = 7127882068649042400L;
 	
 	@Id
+	@Column(name="OVPTRANS_ID")
+	private Long ovptransId;
+	
 	@Column(name="OVPDTLS_ID")
 	private Long ovpdtlsId;
 	

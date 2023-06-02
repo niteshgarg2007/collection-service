@@ -31,4 +31,5 @@ public class ITSOvpSummaryVO {
 	private Double ovpCurrentBalance;
 	private String badActorName;
 	private String costCode;
+	private String currentOverpaymentStatus;
 }

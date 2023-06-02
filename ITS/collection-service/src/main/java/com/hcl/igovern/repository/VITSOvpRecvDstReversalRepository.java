@@ -10,6 +10,6 @@ import com.hcl.igovern.entity.VITSOvpRecvDstReversalEO;
 @Repository
 public interface VITSOvpRecvDstReversalRepository extends JpaRepository<VITSOvpRecvDstReversalEO, Long> {
 
-	List<VITSOvpRecvDstReversalEO> findByRecoveryDtlsId(Long recoveryDtlsId);
+	List<VITSOvpRecvDstReversalEO> findByRecoveryDtlsIdAndOvpdtlsId(Long recoveryDtlsId, Long ovpdtlsId);
 	
 }

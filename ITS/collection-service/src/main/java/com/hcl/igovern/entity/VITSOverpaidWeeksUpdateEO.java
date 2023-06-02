@@ -47,4 +47,7 @@ public class VITSOverpaidWeeksUpdateEO implements Serializable {
 	
 	@Column(name="RECOVERY_AMOUNT")
 	private Double recoveryAmount;
+	
+	@Column(name="IS_CANCELLED")
+	private String isCancelled;
 }

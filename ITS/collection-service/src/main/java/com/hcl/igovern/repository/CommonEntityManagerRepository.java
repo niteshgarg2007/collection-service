@@ -70,16 +70,16 @@ public class CommonEntityManagerRepository {
 		return vITSOverpaidWeeksList;
 	}
 
-	public VITSOverpaidWeeksUpdateEO getExistingProgramCodeDD(Long victimBadActorXrefId, Long ovpId) {
+	public VITSOverpaidWeeksUpdateEO getExistingProgramCodeDD(Long victimBadActorXrefId, Long ovpId, String isCancelled) {
 		List<?> vITSOverpaidWeeksUpdateListTemp = null;
 		List<VITSOverpaidWeeksUpdateEO> vITSOverpaidWeeksExistingList = new ArrayList<>();
 		VITSOverpaidWeeksUpdateEO vITSOverpaidWeeksUpdate = null;
 		String query=null;
         String sql=null;
 		try {
-			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS_UPDATE WHERE VICTIM_BAD_ACTOR_XREF_ID =? AND OVP_ID=?";
+			query = "SELECT DISTINCT CLM_ID,PRGM_CD FROM V_ITS_OVERPAID_WEEKS_UPDATE WHERE VICTIM_BAD_ACTOR_XREF_ID =? AND OVP_ID=? AND IS_CANCELLED=?";
 			sql = String.format(query);
-			vITSOverpaidWeeksUpdateListTemp = entityManager.createNativeQuery(sql).setParameter(1, victimBadActorXrefId).setParameter(2, ovpId).getResultList();
+			vITSOverpaidWeeksUpdateListTemp = entityManager.createNativeQuery(sql).setParameter(1, victimBadActorXrefId).setParameter(2, ovpId).setParameter(3, isCancelled).getResultList();
 			if(vITSOverpaidWeeksUpdateListTemp!=null && !vITSOverpaidWeeksUpdateListTemp.isEmpty()) {
 				for (int i = 0; i < vITSOverpaidWeeksUpdateListTemp.size(); i++) {
 					vITSOverpaidWeeksUpdate = new VITSOverpaidWeeksUpdateEO();
@@ -99,8 +99,8 @@ public class CommonEntityManagerRepository {
 				vITSOverpaidWeeksUpdate = vITSOverpaidWeeksExistingList.get(0);
 			}
 		} catch (Exception e) {
-			logger.error("Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDDList method");
-			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDDList method" +e.getMessage());
+			logger.error("Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDD method");
+			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getExistingProgramCodeDD method" +e.getMessage());
 		}
 		return vITSOverpaidWeeksUpdate;
 	}
