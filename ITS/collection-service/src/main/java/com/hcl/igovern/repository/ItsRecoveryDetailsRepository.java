@@ -12,4 +12,6 @@ public interface ItsRecoveryDetailsRepository extends JpaRepository<ItsRecoveryD
 
 	List<ItsRecoveryDetailsEO> findByOvpId(Long ovpId);
 
+	List<ItsRecoveryDetailsEO> findByOvpIdAndVictimBadActorXrefId(Long ovpId, Long victimBadActorXrefId);
+
 }

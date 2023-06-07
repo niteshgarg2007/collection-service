@@ -20,6 +20,10 @@ import com.hcl.igovern.entity.ItsOverpaymentEO;
 import com.hcl.igovern.entity.ItsOverpaymentTransactionsEO;
 import com.hcl.igovern.entity.ItsOvpRecvDistributionsEO;
 import com.hcl.igovern.entity.ItsRecoveryDetailsEO;
+import com.hcl.igovern.entity.ItsRecoveryEO;
+import com.hcl.igovern.entity.ItsRefundsEO;
+import com.hcl.igovern.entity.ItsVictimBadActorXrefEO;
+import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSDistributionReversalEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
@@ -29,12 +33,15 @@ import com.hcl.igovern.entity.VITSOvpDistributionEO;
 import com.hcl.igovern.entity.VITSOvpRecvDstReversalEO;
 import com.hcl.igovern.entity.VITSOvpStatusHistoryEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
+import com.hcl.igovern.entity.VITSRecoveryProcessSystemEO;
 import com.hcl.igovern.entity.VITSRecoveryStatusEO;
 import com.hcl.igovern.entity.VITSTransactionReversalEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.CommonEntityManagerRepository;
 import com.hcl.igovern.repository.ItsOvpRecvDistributionsRepository;
 import com.hcl.igovern.repository.ItsRecoveryDetailsRepository;
+import com.hcl.igovern.repository.ItsRefundsRepository;
+import com.hcl.igovern.repository.ItsVictimBadActorXrefRepository;
 import com.hcl.igovern.repository.OverpaymentDetailsRepository;
 import com.hcl.igovern.repository.OverpaymentDistributionsRepository;
 import com.hcl.igovern.repository.OverpaymentRepository;
@@ -48,10 +55,13 @@ import com.hcl.igovern.repository.VITSOvpDistributionRepository;
 import com.hcl.igovern.repository.VITSOvpRecvDstReversalRepository;
 import com.hcl.igovern.repository.VITSOvpStatusHistoryRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
+import com.hcl.igovern.repository.VITSRecoveryProcessSystemRepository;
 import com.hcl.igovern.repository.VITSRecoveryStatusRepository;
 import com.hcl.igovern.repository.VITSTransactionReversalRepository;
 import com.hcl.igovern.service.OverpaymentService;
+import com.hcl.igovern.service.RecoveryService;
 import com.hcl.igovern.util.DateUtil;
+import com.hcl.igovern.util.UIUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSOvpsearchDetailsVO;
@@ -118,6 +128,18 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	
 	@Autowired
 	private VITSOverpaymentDetailsRepository vITSOverpaymentDetailsRepository;
+	
+	@Autowired
+	private RecoveryService recoveryService;
+	
+	@Autowired
+	private VITSRecoveryProcessSystemRepository vITSRecoveryProcessSystemRepository;
+	
+	@Autowired
+	private ItsVictimBadActorXrefRepository itsVictimBadActorXrefRepository;
+	
+	@Autowired
+	private ItsRefundsRepository itsRefundsRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -347,7 +369,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 
 	private void maintainOvpTransactionAndDistribution(ItsOverpaymentEO itsOverpaymentEO, List<ItsOverpaymentDetailsEO> itsOverpaymentDetailsList) {
 		try {
-			reverseOvpTransactionAndDistribution(itsOverpaymentEO);
+			boolean recoveryReversal = reverseOvpTransactionAndDistribution(itsOverpaymentEO);
 			Long victimXrefId = itsOverpaymentEO.getVictimBadActorXrefId();
 			if (!itsOverpaymentEO.getOvpstsCd().equalsIgnoreCase("CAN") && itsOverpaymentDetailsList != null && !itsOverpaymentDetailsList.isEmpty()) {
 				for (ItsOverpaymentDetailsEO opweek : itsOverpaymentDetailsList) {
@@ -360,9 +382,159 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 					}
 				}
 			}
+			// apply system recovery
+			if (recoveryReversal) {
+				applyRecoveryHierarchy(itsOverpaymentEO);
+			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.maintainOvpTransactionAndDistribution method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.maintainOvpTransactionAndDistribution() method." + e.getMessage());
+		}
+	}
+
+	private void applyRecoveryHierarchy(ItsOverpaymentEO itsOverpaymentEO) {
+		Double applyAmount = 0.00;
+		try {
+			VITSOvpSummaryEO itsOvpSummaryEO = getVITSOvpSummaryEO(itsOverpaymentEO.getOvpId());
+			List<ItsRecoveryDetailsEO> itsRecoveryDetailsEOList = itsRecoveryDetailsRepository
+					.findByOvpIdAndVictimBadActorXrefId(itsOverpaymentEO.getOvpId(),
+							itsOverpaymentEO.getVictimBadActorXrefId());
+			if (itsRecoveryDetailsEOList != null && !itsRecoveryDetailsEOList.isEmpty()) {
+				for (ItsRecoveryDetailsEO itsRecoveryDtlsEO : itsRecoveryDetailsEOList) {
+					applyAmount = recoveryService.applyRecovery(itsRecoveryDtlsEO, itsOvpSummaryEO);
+					applyAmount = Double.valueOf(UIUtil.roundDouble(applyAmount, 2));
+					if (applyAmount > 0) {
+						// get oldest OVP to newest OVP for ‘Bad Actor and Original Claimant’ association.
+						// (oldest over payment decided by over payment date created time stamp)
+						applyAmount = applyRecoveryByAssociation(itsOverpaymentEO, applyAmount, itsRecoveryDtlsEO);
+						applyAmount = Double.valueOf(UIUtil.roundDouble(applyAmount, 2));
+						if (applyAmount > 0) {
+							// get over payment from oldest original claimant to newest original claimant for ‘Bad Actor’.
+							// (oldest claimant decided by claimant id#)
+							applyAmount = applyRecoveryHierarchyBadActor(itsOverpaymentEO, applyAmount, itsRecoveryDtlsEO);
+						}
+						// create pending refunds if applyAmount > 0
+						applyAmount = Double.valueOf(UIUtil.roundDouble(applyAmount, 2));
+						createSystemPendingRefunds(itsRecoveryDtlsEO.getRecoveryId(), applyAmount);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.applyRecoveryHierarchy method");
+			throw new BusinessException(ERR_CODE,
+					"Something went wrong in OverpaymentServiceImpl.applyRecoveryHierarchy() method." + e.getMessage());
+		}
+	}
+
+	private Double applyRecoveryHierarchyBadActor(ItsOverpaymentEO itsOverpaymentEO, Double applyAmount, ItsRecoveryDetailsEO itsRecoveryDtlsEO) {
+		try {
+			ItsVictimBadActorXrefEO itsVictimBadActorXref = getItsVictimBadActorXrefEO(
+					itsOverpaymentEO.getVictimBadActorXrefId());
+			if (itsVictimBadActorXref != null)
+				applyAmount = applyRecoveryByBadActor(itsVictimBadActorXref.getBadActorId(), applyAmount, itsRecoveryDtlsEO);
+			return applyAmount;
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.applyRecoveryHierarchyBadActor method");
+			throw new BusinessException(ERR_CODE,
+					"Something went wrong in OverpaymentServiceImpl.applyRecoveryHierarchyBadActor() method." + e.getMessage());
+		}
+	}
+
+	private void createSystemPendingRefunds(ItsRecoveryEO itsRecoveryEO, Double availableAmount) {
+		try {
+			if (availableAmount > 0 && itsRecoveryEO != null && itsRecoveryEO.getRecoveryId() != null) {
+				ItsRefundsEO itsRefundsEO = new ItsRefundsEO();
+				itsRefundsEO.setRecoveryId(itsRecoveryEO.getRecoveryId());
+				itsRefundsEO.setRefAmt(availableAmount);
+				itsRefundsEO.setRefDspn("P");
+				itsRefundsEO.setRefAmtIssued(null);
+				itsRefundsEO.setRefIssuedDate(null);
+				itsRefundsRepository.save(itsRefundsEO);
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.createPendingRefunds method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.createPendingRefunds() method." + e.getMessage());
+		}
+	}
+
+	private Double applyRecoveryByBadActor(Long badActorId, Double availableAmount, ItsRecoveryDetailsEO itsRecoveryDtlsEO) {
+		try {
+			List<VITSRecoveryProcessSystemEO> recoveryProcessSysEOList = vITSRecoveryProcessSystemRepository.getOverpayentDataByBadActor(badActorId);
+			availableAmount = applyRecoverySystem(recoveryProcessSysEOList,availableAmount,itsRecoveryDtlsEO);
+			return availableAmount;
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.applyRecoveryByBadActor method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.applyRecoveryByBadActor() method." + e.getMessage());
+		}
+	}
+
+	private Double applyRecoveryByAssociation(ItsOverpaymentEO itsOverpaymentEO, Double availableAmount, ItsRecoveryDetailsEO itsRecoveryDtlsEO) {
+		try {
+			List<VITSRecoveryProcessSystemEO> recoveryProcessSysEOList = vITSRecoveryProcessSystemRepository.getOverpayentDataByAssociation(itsOverpaymentEO.getVictimBadActorXrefId());
+			availableAmount = applyRecoverySystem(recoveryProcessSysEOList,availableAmount,itsRecoveryDtlsEO);
+			return availableAmount;
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.applyRecoveryByAssociation method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.applyRecoveryByAssociation() method." + e.getMessage());
+		}
+	}
+	
+	private Double applyRecoverySystem(List<VITSRecoveryProcessSystemEO> recoveryProcessSysEOList, Double availableAmount, ItsRecoveryDetailsEO itsRecoveryDtlsEO) {
+		try {
+			Double currentPaymentAmountBal = availableAmount;
+			if (recoveryProcessSysEOList != null && !recoveryProcessSysEOList.isEmpty()) {
+				for (VITSRecoveryProcessSystemEO recoveryProcessSysEO : recoveryProcessSysEOList) {
+					currentPaymentAmountBal = Double.valueOf(UIUtil.roundDouble(currentPaymentAmountBal, 2));
+					if (currentPaymentAmountBal > 0) {
+						ItsOverpaymentTransactionsEO itsOvpTransObject = new ItsOverpaymentTransactionsEO();
+						if (currentPaymentAmountBal >= recoveryProcessSysEO.getOvpBalance()) {
+							itsOvpTransObject.setTransAmount(recoveryProcessSysEO.getOvpBalance() * -1);
+							currentPaymentAmountBal = currentPaymentAmountBal - recoveryProcessSysEO.getOvpBalance();
+						} else {
+							itsOvpTransObject.setTransAmount(currentPaymentAmountBal * -1);
+							currentPaymentAmountBal = 0.00;
+						}
+						itsOvpTransObject.setRecoveryDtlsId(itsRecoveryDtlsEO);
+						ItsOverpaymentDetailsEO itsOverpaymentDetailsEO = getItsOverpaymentDetailsEO(recoveryProcessSysEO.getOvpdtlsId());
+						itsOvpTransObject.setOvpdtlsId(itsOverpaymentDetailsEO);
+						overpaymentTransactionsRepository.save(itsOvpTransObject);
+						saveOvpRecoveryDistribution(itsRecoveryDtlsEO,recoveryProcessSysEO,itsOvpTransObject,itsOverpaymentDetailsEO);
+					}
+				}
+			}
+			return currentPaymentAmountBal;
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.applyRecoverySystem method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.applyRecoverySystem() method." + e.getMessage());
+		}
+	}
+
+	private void saveOvpRecoveryDistribution(ItsRecoveryDetailsEO itsRecoveryDetailsEO, VITSRecoveryProcessSystemEO recoveryProcessSysEO,
+			ItsOverpaymentTransactionsEO itsOvpTransObject,ItsOverpaymentDetailsEO itsovpDetailsEO) {
+		Double percent = 0.00;
+		try {
+			if (recoveryProcessSysEO != null && recoveryProcessSysEO.getOvptypCd().equalsIgnoreCase("S") && recoveryProcessSysEO.getCbwkBweDt() != null) {
+				//get over payment distribution details to distribute in each fund distributions
+				List<PITSRecoveryDstPercentageEO> pITSRecoveryDstPercentageEOList = commonEntityManagerRepository.getITSRecoveryDstPercentage(itsovpDetailsEO.getOvpdtlsId());
+				if (pITSRecoveryDstPercentageEOList != null && !pITSRecoveryDstPercentageEOList.isEmpty()) {
+					for (PITSRecoveryDstPercentageEO recoveryDstPercentageEO : pITSRecoveryDstPercentageEOList) {
+						ItsOvpRecvDistributionsEO ovpRecvDistributionsEO = new ItsOvpRecvDistributionsEO();
+						ovpRecvDistributionsEO.setRecoveryDtlsId(itsRecoveryDetailsEO);
+						ovpRecvDistributionsEO.setOvpdtlsId(itsovpDetailsEO);
+						ovpRecvDistributionsEO.setPrgfndAcctNo(recoveryDstPercentageEO.getPrgfndAcctNo());
+						if (recoveryDstPercentageEO.getPrgfndAcctNo().equalsIgnoreCase("$UI_UI")) {
+							percent = Double.valueOf(UIUtil.roundDouble(recoveryDstPercentageEO.getMonPercentage(), 5));
+						} else {
+							percent = Double.valueOf(UIUtil.roundDown(recoveryDstPercentageEO.getMonPercentage(), 5));
+						}
+						ovpRecvDistributionsEO.setRecdstAmount(UIUtil.roundUp(itsOvpTransObject.getTransAmount().doubleValue() * percent.doubleValue(), 2));
+						itsOvpRecvDistributionsRepository.save(ovpRecvDistributionsEO);
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.saveOvpRecoveryDistribution method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.saveOvpRecoveryDistribution() method." + e.getMessage());
 		}
 	}
 
@@ -384,7 +556,9 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		}
 	}
 
-	private void reverseOvpTransactionAndDistribution(ItsOverpaymentEO itsOverpaymentEO) {
+	private boolean reverseOvpTransactionAndDistribution(ItsOverpaymentEO itsOverpaymentEO) {
+		boolean recoveryReversal = false;
+		boolean recoveryReversalExisted = false;
 		ItsOverpaymentDetailsEO itsOvpDetailsEO = null;
 		ItsRecoveryDetailsEO itsRecoveryDetailsEO = null;
 		try {
@@ -402,20 +576,31 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 						overpaymentTransEO.setTransAmount(transReversalEO.getReversalTransAmount() * -1);
 						overpaymentTransactionsRepository.save(overpaymentTransEO);
 						callReverseOvpDistribution(transReversalEO,itsOvpDetailsEO);
-						callReverseOvpRecvDistribution(transReversalEO,itsOvpDetailsEO);
+						recoveryReversal = callReverseOvpRecvDistribution(transReversalEO,itsOvpDetailsEO);
+						recoveryReversalExisted = getRecoveryReversalExisted(recoveryReversal, recoveryReversalExisted);
 					}
 				}
 			}
+			return recoveryReversalExisted;
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.reverseOvpTransactionAndDistribution method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.reverseOvpTransactionAndDistribution() method." + e.getMessage());
 		}
 	}
 
-	private void callReverseOvpRecvDistribution(VITSTransactionReversalEO transReversalEO, ItsOverpaymentDetailsEO itsOvpDetailsEO) {
-		if (itsOvpDetailsEO != null && itsOvpDetailsEO.getCbwkBweDt() != null && transReversalEO.getRecoveryDtlsId() != null) {
-			reverseOvpRecvDistribution(transReversalEO,itsOvpDetailsEO);
+	private boolean getRecoveryReversalExisted(boolean recoveryReversal, boolean recoveryReversalExisted) {
+		if (recoveryReversal && !recoveryReversalExisted) {
+			recoveryReversalExisted = true;
 		}
+		return recoveryReversalExisted;
+	}
+
+	private boolean callReverseOvpRecvDistribution(VITSTransactionReversalEO transReversalEO, ItsOverpaymentDetailsEO itsOvpDetailsEO) {
+		boolean recoveryReversal = false;
+		if (itsOvpDetailsEO != null && itsOvpDetailsEO.getCbwkBweDt() != null && transReversalEO.getRecoveryDtlsId() != null) {
+			recoveryReversal = reverseOvpRecvDistribution(transReversalEO,itsOvpDetailsEO);
+		}
+		return recoveryReversal;
 	}
 
 	private void callReverseOvpDistribution(VITSTransactionReversalEO transReversalEO, ItsOverpaymentDetailsEO itsOvpDetailsEO) {
@@ -425,15 +610,13 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		}
 	}
 
-	private void reverseOvpRecvDistribution(VITSTransactionReversalEO transReversalEO, ItsOverpaymentDetailsEO itsOvpDetailsEO) {
+	private boolean reverseOvpRecvDistribution(VITSTransactionReversalEO transReversalEO, ItsOverpaymentDetailsEO itsOvpDetailsEO) {
+		boolean recoveryReversal = false;
 		try {
 			List<VITSOvpRecvDstReversalEO> ovpRecvDstReversalEOList = vITSOvpRecvDstReversalRepository.findByRecoveryDtlsIdAndOvpdtlsId(transReversalEO.getRecoveryDtlsId(),transReversalEO.getOvpdtlsId());
-			ItsRecoveryDetailsEO itsRecoveryDetailsEO = null;
-			Optional<ItsRecoveryDetailsEO> itsRecoveryDtlsEOOpt = itsRecoveryDetailsRepository.findById(transReversalEO.getRecoveryDtlsId());
-			if (itsRecoveryDtlsEOOpt.isPresent()) {
-				itsRecoveryDetailsEO = itsRecoveryDtlsEOOpt.get();
-			}
+			ItsRecoveryDetailsEO itsRecoveryDetailsEO = getItsRecoveryDetailsEO(transReversalEO.getRecoveryDtlsId());
 			if (ovpRecvDstReversalEOList != null && !ovpRecvDstReversalEOList.isEmpty() && itsRecoveryDetailsEO != null) {
+				recoveryReversal = true;
 				for (VITSOvpRecvDstReversalEO ovpRecvDstReversalEO : ovpRecvDstReversalEOList) {
 					ItsOvpRecvDistributionsEO ovpRecvDistributionsEO = new ItsOvpRecvDistributionsEO();
 					ovpRecvDistributionsEO.setOvpdtlsId(itsOvpDetailsEO);
@@ -443,6 +626,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 					itsOvpRecvDistributionsRepository.save(ovpRecvDistributionsEO);
 				}
 			}
+			return recoveryReversal;
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.reverseOvpRecvDistribution method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.reverseOvpRecvDistribution() method." + e.getMessage());
@@ -478,6 +662,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 								&& itsOverpaymentDetailsEO.getOvpdtlsId().equals(opWeek.getOvpdtlsId())
 								&& !isDetailsExist) {
 							isDetailsExist = true;
+							break;
 						}
 					}
 					// update over payment detail data as delete indicator as Y
@@ -953,11 +1138,11 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		return itsOvpSummaryVOList;
 	}
 	
-	private ItsOverpaymentDetailsEO getItsOverpaymentDetailsEO(Long OvpdtlsId) {
+	private ItsOverpaymentDetailsEO getItsOverpaymentDetailsEO(Long ovpdtlsId) {
 		ItsOverpaymentDetailsEO itsOverpaymentDetailsEO = null;
 		try {
-			if (OvpdtlsId != null) {
-				Optional<ItsOverpaymentDetailsEO> itsOverpaymentDetailsEOOpt = overpaymentDetailsRepository.findById(OvpdtlsId);
+			if (ovpdtlsId != null) {
+				Optional<ItsOverpaymentDetailsEO> itsOverpaymentDetailsEOOpt = overpaymentDetailsRepository.findById(ovpdtlsId);
 				if (itsOverpaymentDetailsEOOpt.isPresent()) {
 					itsOverpaymentDetailsEO = itsOverpaymentDetailsEOOpt.get();
 				}
@@ -985,5 +1170,39 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		}
 		
 		return itsRecoveryDetailsEO;
+	}
+	
+	private VITSOvpSummaryEO getVITSOvpSummaryEO(Long ovpId) {
+		VITSOvpSummaryEO vITSOvpSummaryEO = null;
+		try {
+			if (ovpId != null) {
+				Optional<VITSOvpSummaryEO> vITSOvpSummaryEOOpt = vITSOvpSummaryRepository.findById(ovpId);
+				if (vITSOvpSummaryEOOpt.isPresent()) {
+					vITSOvpSummaryEO = vITSOvpSummaryEOOpt.get();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.getVITSOvpSummaryEO method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getVITSOvpSummaryEO() method." + e.getMessage());
+		}
+		
+		return vITSOvpSummaryEO;
+	}
+	
+	private ItsVictimBadActorXrefEO getItsVictimBadActorXrefEO(Long victimBadActorXrefId) {
+		ItsVictimBadActorXrefEO itsVictimBadActorXrefEO = null;
+		try {
+			if (victimBadActorXrefId != null) {
+				Optional<ItsVictimBadActorXrefEO> itsVictimBadActorXrefEOOpt = itsVictimBadActorXrefRepository.findById(victimBadActorXrefId);
+				if (itsVictimBadActorXrefEOOpt.isPresent()) {
+					itsVictimBadActorXrefEO = itsVictimBadActorXrefEOOpt.get();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in OverpaymentServiceImpl.getItsVictimBadActorXrefEO method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.getItsVictimBadActorXrefEO() method." + e.getMessage());
+		}
+		
+		return itsVictimBadActorXrefEO;
 	}
 }

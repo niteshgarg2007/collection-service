@@ -15,4 +15,5 @@ public class ITSRecovsearchDetailsVO {
 	private String comment;
 	private String badActorSsn;
 	private String prtyTaxId;
+	private String recoveryStatus;
 }

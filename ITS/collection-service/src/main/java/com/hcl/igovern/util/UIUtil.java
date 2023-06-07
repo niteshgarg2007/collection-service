@@ -8,7 +8,7 @@ public class UIUtil {
 	private UIUtil() {}
 
 	public static final double roundUp(double d, int places) {
-		return BigDecimal.valueOf(d).setScale(places, RoundingMode.UP).doubleValue();
+		return BigDecimal.valueOf(d).setScale(places, RoundingMode.HALF_UP).doubleValue();
 	}
 	
 	public static final double roundDouble(double d, int places) {
