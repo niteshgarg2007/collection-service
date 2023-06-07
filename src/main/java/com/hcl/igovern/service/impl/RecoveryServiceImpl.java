@@ -191,7 +191,6 @@ public class RecoveryServiceImpl implements RecoveryService {
 		List<ItsRecoveryDetailsEO> itsRecoveryDetailsList = null;
 		try {
 			itsRecoveryEOTemp.setBadActorId(itsRecoveryVO.getBadActorId());
-			//itsRecoveryEOTemp.setRecoveryDate(DateUtil.strDateToTs(itsRecoveryVO.getRecoveryDate()));
 			itsRecoveryEOTemp.setRecoveryDate(DateUtil.parseDateTime(DateUtil.getCurrentDateString()));
 			itsRecoveryEOTemp.setRecoveryStatus("Closed");
 			itsRecoveryEOTemp.setRecoveryEffDate(DateUtil.strDateHyphenToTs(itsRecoveryVO.getRecoveryEffDate()));
@@ -648,7 +647,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 	private void populateRecoveryProcessData(List<ItsRecoveryDetailsEO> itsRecoveryDtls) {
 		try {
 			for (ItsRecoveryDetailsEO itsRecoveryDetailsEO : itsRecoveryDtls) {
-				applyRecovery(itsRecoveryDetailsEO);
+				applyRecovery(itsRecoveryDetailsEO, null);
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in RecoveryServiceImpl.populateRecoveryProcessData method");
@@ -656,7 +655,22 @@ public class RecoveryServiceImpl implements RecoveryService {
 		}
 	}
 
-	private void applyRecovery(ItsRecoveryDetailsEO itsRecoveryDetailsEO) {
+	public Double applyRecovery(ItsRecoveryDetailsEO itsRecoveryDetailsEO, VITSOvpSummaryEO itsOvpSummaryEO) {
+		try {
+			Double availableAmount = itsRecoveryDetailsEO.getPaymentAmount();
+			if (itsOvpSummaryEO == null) {
+				applyRecoveryProcess(itsRecoveryDetailsEO);
+			} else if (!itsOvpSummaryEO.getOvpstsCd().equalsIgnoreCase("CAN") && itsOvpSummaryEO.getOvpBalance() > 0) {
+				availableAmount = applyRecoveryProcess(itsRecoveryDetailsEO);
+			}
+			return availableAmount;
+		} catch (Exception e) {
+			logger.error("Business Exception in RecoveryServiceImpl.applyRecovery method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.applyRecovery() method." + e.getMessage());
+		}
+	}
+
+	private Double applyRecoveryProcess(ItsRecoveryDetailsEO itsRecoveryDetailsEO) {
 		try {
 			Double currentPaymentAmountBal = itsRecoveryDetailsEO.getPaymentAmount();
 			List<VITSRecoveryProcessInputEO> vITSRecoveryProcessInputEOList = vITSRecoveryProcessInputRepository.getRecoveryProcessInput(itsRecoveryDetailsEO.getOvpId());
@@ -664,9 +678,9 @@ public class RecoveryServiceImpl implements RecoveryService {
 				for (VITSRecoveryProcessInputEO vITSRecoveryProcessInputEO : vITSRecoveryProcessInputEOList) {
 					if (currentPaymentAmountBal > 0) {
 						ItsOverpaymentTransactionsEO itsOvpTransObject = new ItsOverpaymentTransactionsEO();
-						if (currentPaymentAmountBal >= vITSRecoveryProcessInputEO.getOvpBalance()) {
-							itsOvpTransObject.setTransAmount(vITSRecoveryProcessInputEO.getOvpBalance() * -1);
-							currentPaymentAmountBal = currentPaymentAmountBal - vITSRecoveryProcessInputEO.getOvpBalance();
+						if (currentPaymentAmountBal >= Double.valueOf(UIUtil.roundDouble(vITSRecoveryProcessInputEO.getOvpBalance(), 2))) {
+							itsOvpTransObject.setTransAmount(Double.valueOf(UIUtil.roundDouble(vITSRecoveryProcessInputEO.getOvpBalance(), 2)) * -1);
+							currentPaymentAmountBal = currentPaymentAmountBal - Double.valueOf(UIUtil.roundDouble(vITSRecoveryProcessInputEO.getOvpBalance(), 2));
 						} else {
 							itsOvpTransObject.setTransAmount(currentPaymentAmountBal * -1);
 							currentPaymentAmountBal = 0.00;
@@ -679,9 +693,10 @@ public class RecoveryServiceImpl implements RecoveryService {
 					}
 				}
 			}
+			return currentPaymentAmountBal;
 		} catch (Exception e) {
-			logger.error("Business Exception in RecoveryServiceImpl.applyRecovery method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.applyRecovery() method." + e.getMessage());
+			logger.error("Business Exception in RecoveryServiceImpl.applyRecoveryProcess method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.applyRecoveryProcess() method." + e.getMessage());
 		}
 	}
 

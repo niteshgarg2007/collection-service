@@ -44,5 +44,8 @@ public class VITSRecovsearchDetailsEO implements Serializable {
 	
 	@Column(name="PRTY_TAX_ID")
 	private String prtyTaxId;
+	
+	@Column(name="RECOVERY_STATUS")
+	private String recoveryStatus;
 
 }

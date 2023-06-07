@@ -2,6 +2,8 @@ package com.hcl.igovern.service;
 
 import java.util.List;
 
+import com.hcl.igovern.entity.ItsRecoveryDetailsEO;
+import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
@@ -36,5 +38,7 @@ public interface RecoveryService {
 	List<ITSRecoverySummaryVO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO);
 
 	List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(Long selectedRecoveryId);
+
+	Double applyRecovery(ItsRecoveryDetailsEO itsRecoveryDetailsEO, VITSOvpSummaryEO itsOvpSummaryEO);
 
 }
