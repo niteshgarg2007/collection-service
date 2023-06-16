@@ -199,7 +199,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	private OverpaidWeeksVO setFundCodeData(OverpaidWeeksVO overpaidWeeksVO, List<VITSOvpDistributionEO> vovpDdstList) {
 		String fundCode = "";
 		fundCode = vovpDdstList.stream().filter(prgm -> prgm != null && prgm.getPrgfndAcctNo() != null)
-				.map(s -> s.getPrgfndAcctNo()).collect(Collectors.joining(","));
+				.map(VITSOvpDistributionEO :: getPrgfndAcctNo).collect(Collectors.joining(","));
 		overpaidWeeksVO.setFundCode(fundCode);
 		return overpaidWeeksVO;
 	}

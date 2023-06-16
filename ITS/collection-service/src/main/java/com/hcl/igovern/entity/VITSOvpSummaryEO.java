@@ -80,4 +80,10 @@ public class VITSOvpSummaryEO implements Serializable {
 	
 	@Column(name="BAD_ACTOR_NAME")
 	private String badActorName;
+	
+	@Column(name="PROS_ID")
+	private Long prosId;
+	
+	@Column(name="PROS_OVP_XREF_ID")
+	private Long prosOvpXrefId;
 }
