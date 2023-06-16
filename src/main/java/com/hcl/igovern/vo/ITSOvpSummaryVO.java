@@ -32,4 +32,7 @@ public class ITSOvpSummaryVO {
 	private String badActorName;
 	private String costCode;
 	private String currentOverpaymentStatus;
+	private Long prosId;
+	private Long prosOvpXrefId;
+	private Double resiAmtInput;
 }

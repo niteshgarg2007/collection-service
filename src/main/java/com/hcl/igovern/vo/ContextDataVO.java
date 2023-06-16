@@ -17,4 +17,5 @@ public class ContextDataVO {
 	private Long recoveryId;
 	private String allOvpUpdateInd;
 	private String isCancelled;
+	private Long prosId;
 }

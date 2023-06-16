@@ -2,17 +2,21 @@ package com.hcl.igovern.entity;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.hcl.igovern.auditing.Auditable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,8 +40,8 @@ public class ItsProsecutionEO extends Auditable<String> implements Serializable 
 	@Column(name="BAD_ACTOR_ID")
 	private Long badActorId;
 	
-	@Column(name="CNTY_ID")
-	private Long cntyId;
+	@Column(name="CLAIMANT_LOCALITY")
+	private String claimantLocality;
 	
 	@Column(name="PROS_VENUE_ID")
 	private Long prosVenueId;
@@ -74,4 +78,10 @@ public class ItsProsecutionEO extends Auditable<String> implements Serializable 
 	
 	@Column(name="COMMENTS")
 	private String comments;
+	
+	@Column(name="ALL_OVP_IND")
+	private String allOvpInd;
+	
+	@OneToMany(targetEntity = ItsProsecutionsOverpaymentXrefEO.class, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "prosId", fetch=FetchType.EAGER)
+	private List<ItsProsecutionsOverpaymentXrefEO> itsProsecutionsOverpaymentXrefs;
 }

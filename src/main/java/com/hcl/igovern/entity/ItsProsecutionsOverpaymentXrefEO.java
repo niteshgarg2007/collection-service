@@ -7,12 +7,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.hcl.igovern.auditing.Auditable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,8 +37,9 @@ public class ItsProsecutionsOverpaymentXrefEO extends Auditable<String> implemen
 	@Column(name="PROS_OVP_XREF_ID")
 	private Long prosOvpXrefId;
 	
-	@Column(name="PROS_ID")
-	private Long prosId;
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	@JoinColumn(name="PROS_ID")
+	private ItsProsecutionEO prosId;
 	
 	@Column(name="OVP_ID")
 	private Long ovpId;
