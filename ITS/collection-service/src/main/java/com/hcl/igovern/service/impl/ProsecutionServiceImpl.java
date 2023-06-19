@@ -20,6 +20,7 @@ import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.entity.VITSProsecutionHistoryEO;
 import com.hcl.igovern.entity.VITSProsecutionSummaryEO;
 import com.hcl.igovern.exception.BusinessException;
+import com.hcl.igovern.repository.CommonEntityManagerRepository;
 import com.hcl.igovern.repository.ItsProsecutionRepository;
 import com.hcl.igovern.repository.ItsProsecutionsOverpaymentXrefRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
@@ -53,6 +54,9 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 	
 	@Autowired
 	private ItsProsecutionsOverpaymentXrefRepository itsProsecutionsOverpaymentXrefRepository;
+	
+	@Autowired
+    private CommonEntityManagerRepository commonEntityManagerRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -508,33 +512,10 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 	}
 
 	private List<ItsProsecutionsOverpaymentXrefVO> getProsOvpXrefListByProsIdAndBadActorId(ContextDataVO contextDataVO) {
-		List<VITSOvpSummaryEO> vITSProsUpdateEOList = null;
-		List<ItsProsecutionsOverpaymentXrefVO> prosOvpXrefVOList = new ArrayList<>();
+		List<ItsProsecutionsOverpaymentXrefVO> prosOvpXrefVOList = null;
 		try {
 			if (contextDataVO.getProsId() != null && contextDataVO.getBadActorId() != null) {
-				vITSProsUpdateEOList = vITSOvpSummaryRepository.getVITSProsecutionUpdateByBadActorList(contextDataVO.getBadActorId(),contextDataVO.getProsId());
-				if (vITSProsUpdateEOList != null && !vITSProsUpdateEOList.isEmpty()) {
-					for (VITSOvpSummaryEO prosUpdateEO : vITSProsUpdateEOList) {
-						ItsProsecutionsOverpaymentXrefVO prosOvpXrefVO = new ItsProsecutionsOverpaymentXrefVO();
-						prosOvpXrefVO.setOvpId(prosUpdateEO.getOvpId());
-						prosOvpXrefVO.setDateCreated(DateUtil.convertDateToString(prosUpdateEO.getDateCreated()));
-						prosOvpXrefVO.setOvpTotal(prosUpdateEO.getOvpTotal());
-						prosOvpXrefVO.setRecoveryAmount(prosUpdateEO.getRecoveryAmount());
-						prosOvpXrefVO.setOvpPenalty(prosUpdateEO.getOvpPenalty());
-						prosOvpXrefVO.setOvpInterest(prosUpdateEO.getOvpInterest());
-						prosOvpXrefVO.setOvpCoc(prosUpdateEO.getOvpCoc());
-						prosOvpXrefVO.setRestiAmount(prosUpdateEO.getRestiAmount());
-						prosOvpXrefVO.setOvpstsCd(prosUpdateEO.getOvpstsCd());
-						prosOvpXrefVO.setOvpdisCd(prosUpdateEO.getOvpdisCd());
-						prosOvpXrefVO.setResiAmt(prosUpdateEO.getRestiAmount());
-						prosOvpXrefVO.setBadActorSsn(prosUpdateEO.getBadActorSsn());
-						prosOvpXrefVO.setPrtyTaxId(prosUpdateEO.getPrtyTaxId());
-						prosOvpXrefVO.setProsOvpXrefId(prosUpdateEO.getProsOvpXrefId());
-						prosOvpXrefVO.setProsId(prosUpdateEO.getProsId());
-						prosOvpXrefVO.setOvpBalance(prosUpdateEO.getOvpBalance());
-						prosOvpXrefVOList.add(prosOvpXrefVO);
-					}
-				}
+				prosOvpXrefVOList = commonEntityManagerRepository.getVITSProsecutionUpdateByBadActorList(contextDataVO.getBadActorId(),contextDataVO.getProsId());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in ProsecutionServiceImpl.getProsOvpXrefListByProsIdAndBadActorId method");
@@ -545,40 +526,17 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 	}
 
 	private List<ItsProsecutionsOverpaymentXrefVO> getProsOvpXrefByProsIdAndAssociation(ContextDataVO contextDataVO) {
-		List<VITSOvpSummaryEO> vITSProsUpdateEOList = null;
-		List<ItsProsecutionsOverpaymentXrefVO> prosOvpXrefVOList = new ArrayList<>();
+		List<ItsProsecutionsOverpaymentXrefVO> vITSProsUpdateVOList = null;
 		try {
 			if (contextDataVO.getProsId() != null && contextDataVO.getVictimBadActorXrefId() != null) {
-				vITSProsUpdateEOList = vITSOvpSummaryRepository.getVITSProsecutionUpdateByXrefList(contextDataVO.getVictimBadActorXrefId(),contextDataVO.getProsId());
-				if (vITSProsUpdateEOList != null && !vITSProsUpdateEOList.isEmpty()) {
-					for (VITSOvpSummaryEO prosUpdateEO : vITSProsUpdateEOList) {
-						ItsProsecutionsOverpaymentXrefVO prosOvpXrefVO = new ItsProsecutionsOverpaymentXrefVO();
-						prosOvpXrefVO.setOvpId(prosUpdateEO.getOvpId());
-						prosOvpXrefVO.setDateCreated(DateUtil.convertDateToString(prosUpdateEO.getDateCreated()));
-						prosOvpXrefVO.setOvpTotal(prosUpdateEO.getOvpTotal());
-						prosOvpXrefVO.setRecoveryAmount(prosUpdateEO.getRecoveryAmount());
-						prosOvpXrefVO.setOvpPenalty(prosUpdateEO.getOvpPenalty());
-						prosOvpXrefVO.setOvpInterest(prosUpdateEO.getOvpInterest());
-						prosOvpXrefVO.setOvpCoc(prosUpdateEO.getOvpCoc());
-						prosOvpXrefVO.setRestiAmount(prosUpdateEO.getRestiAmount());
-						prosOvpXrefVO.setOvpstsCd(prosUpdateEO.getOvpstsCd());
-						prosOvpXrefVO.setOvpdisCd(prosUpdateEO.getOvpdisCd());
-						prosOvpXrefVO.setResiAmt(prosUpdateEO.getRestiAmount());
-						prosOvpXrefVO.setBadActorSsn(prosUpdateEO.getBadActorSsn());
-						prosOvpXrefVO.setPrtyTaxId(prosUpdateEO.getPrtyTaxId());
-						prosOvpXrefVO.setProsOvpXrefId(prosUpdateEO.getProsOvpXrefId());
-						prosOvpXrefVO.setProsId(prosUpdateEO.getProsId());
-						prosOvpXrefVO.setOvpBalance(prosUpdateEO.getOvpBalance());
-						prosOvpXrefVOList.add(prosOvpXrefVO);
-					}
-				}
+				vITSProsUpdateVOList = commonEntityManagerRepository.getVITSProsecutionUpdateByXrefList(contextDataVO.getVictimBadActorXrefId(),contextDataVO.getProsId());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in ProsecutionServiceImpl.getProsOvpXrefByProsIdAndAssociation method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in ProsecutionServiceImpl.getProsOvpXrefByProsIdAndAssociation() method." + e.getMessage());
 		}
 		
-		return prosOvpXrefVOList;
+		return vITSProsUpdateVOList;
 	}
 	
 	private ItsProsecutionEO getItsProsecutionEO(Long selectedProsId) {
