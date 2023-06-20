@@ -17,13 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hcl.igovern.entity.ItsProsecutionEO;
 import com.hcl.igovern.entity.ItsProsecutionsOverpaymentXrefEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
+import com.hcl.igovern.entity.VITSProsOvpxrefEO;
 import com.hcl.igovern.entity.VITSProsecutionHistoryEO;
+import com.hcl.igovern.entity.VITSProsecutionListEO;
 import com.hcl.igovern.entity.VITSProsecutionSummaryEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.CommonEntityManagerRepository;
 import com.hcl.igovern.repository.ItsProsecutionRepository;
 import com.hcl.igovern.repository.ItsProsecutionsOverpaymentXrefRepository;
 import com.hcl.igovern.repository.VITSOvpSummaryRepository;
+import com.hcl.igovern.repository.VITSProsOvpxrefRepository;
 import com.hcl.igovern.repository.VITSProsecutionHistoryRepository;
 import com.hcl.igovern.repository.VITSProsecutionSummaryRepository;
 import com.hcl.igovern.service.ProsecutionService;
@@ -31,9 +34,11 @@ import com.hcl.igovern.util.DateUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSProsecutionHistoryVO;
+import com.hcl.igovern.vo.ITSProsecutionListVO;
 import com.hcl.igovern.vo.ITSProsecutionSummaryVO;
 import com.hcl.igovern.vo.ItsProsecutionVO;
 import com.hcl.igovern.vo.ItsProsecutionsOverpaymentXrefVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 @Service
 public class ProsecutionServiceImpl implements ProsecutionService {
@@ -57,6 +62,9 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 	
 	@Autowired
     private CommonEntityManagerRepository commonEntityManagerRepository;
+	
+	@Autowired
+    private VITSProsOvpxrefRepository vITSProsOvpxrefRepository;
 	
 	public static final String ERR_CODE = "ERR_CODE";
 
@@ -571,6 +579,57 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 		}
 		
 		return itsProsecutionsOverpaymentXrefEO;
+	}
+
+	@Override
+	public List<ITSProsecutionListVO> getSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
+
+		List<VITSProsecutionListEO> vITSProsecutionListEO = null;
+		List<ITSProsecutionListVO> itsProsecutionListVO = new ArrayList<>();
+		try {
+			vITSProsecutionListEO = commonEntityManagerRepository.getProsSearchBadActorData(searchBadActorDataVO);
+			if (vITSProsecutionListEO != null && !vITSProsecutionListEO.isEmpty()) {
+				itsProsecutionListVO = vITSProsecutionListEO.stream().map(vITSProsecutionEO -> {
+					ITSProsecutionListVO itsProsecutionVO = new ITSProsecutionListVO();
+					BeanUtils.copyProperties(vITSProsecutionEO, itsProsecutionVO);
+					itsProsecutionVO.setWarrantReqDt(DateUtil.convertDateToString(vITSProsecutionEO.getWarrantReqDt()));
+					itsProsecutionVO.setIniCourtDt(DateUtil.convertDateToString(vITSProsecutionEO.getIniCourtDt()));
+					itsProsecutionVO.setContinuedDt(DateUtil.convertDateToString(vITSProsecutionEO.getContinuedDt()));
+					itsProsecutionVO.setConvictionDt(DateUtil.convertDateToString(vITSProsecutionEO.getConvictionDt()));
+					itsProsecutionVO.setDateCreated(DateUtil.convertDateToString(vITSProsecutionEO.getDateCreated()));
+					return itsProsecutionVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			logger.error("Business Exception in ProsecutionServiceImpl.getSearchBadActorData method");
+			throw new BusinessException(ERR_CODE,
+					"Something went wrong in ProsecutionServiceImpl.getSearchBadActorData() method."
+							+ e.getMessage());
+		}
+		return itsProsecutionListVO;
+	
+	}
+
+	@Override
+	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(Long selectedProsecutionId) {
+		List<VITSProsOvpxrefEO> vITSProsOvpxrefEOList = null;
+		List<ItsProsecutionsOverpaymentXrefVO> prosOvpXrefVOList = new ArrayList<>();
+		try {
+			vITSProsOvpxrefEOList = vITSProsOvpxrefRepository.findByProsId(selectedProsecutionId);
+			if (vITSProsOvpxrefEOList != null && !vITSProsOvpxrefEOList.isEmpty()) {
+				prosOvpXrefVOList = vITSProsOvpxrefEOList.stream().map(vITSProsOvpxrefEO -> {
+					ItsProsecutionsOverpaymentXrefVO prosOvpXrefVO = new ItsProsecutionsOverpaymentXrefVO();
+					BeanUtils.copyProperties(vITSProsOvpxrefEO, prosOvpXrefVO);
+					prosOvpXrefVO.setDateCreated(DateUtil.convertDateToString(vITSProsOvpxrefEO.getDateCreated()));
+					return prosOvpXrefVO;
+				}).collect(Collectors.toList());
+			}
+		} catch (BusinessException e) {
+			logger.error("Business Exception in ProsecutionServiceImpl.getITSProsecutionDetailsList method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in ProsecutionServiceImpl.getITSProsecutionDetailsList() method." + e.getMessage());
+		}
+		
+		return prosOvpXrefVOList;
 	}
 	
 }

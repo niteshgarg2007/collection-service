@@ -19,9 +19,13 @@ import com.hcl.igovern.service.ProsecutionService;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSProsecutionHistoryVO;
+import com.hcl.igovern.vo.ITSProsecutionListVO;
 import com.hcl.igovern.vo.ITSProsecutionSummaryVO;
+import com.hcl.igovern.vo.ITSRecoverySummaryVO;
+import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
 import com.hcl.igovern.vo.ItsProsecutionVO;
 import com.hcl.igovern.vo.ItsProsecutionsOverpaymentXrefVO;
+import com.hcl.igovern.vo.SearchBadActorDataVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -148,6 +152,30 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 			logger.error("Business Exception in ProsecutionController.getOverpaymentUpdateDetailsListByParams() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in ProsecutionController.getOverpaymentUpdateDetailsListByParams() method." + be.getMessage());
 		}
+		return list;
+	}
+	
+	@Operation(summary = "Retrieve bad actor prosecution data")
+	@PostMapping("/prosbadactorsearch")
+	public List<ITSProsecutionListVO> getSearchBadActorData(@RequestBody SearchBadActorDataVO searchBadActorDataVO ) {
+		logger.info("Starting to calling getRecovSearchBadActorData method"); 
+		return prosecutionService.getSearchBadActorData(searchBadActorDataVO);			
+	}
+	
+	@Operation(summary = "Retrieve prosecution search details list for the selected prosecution id.")
+	@GetMapping("/prosdetailslist/{selectedProsecutionId}")
+	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(@PathVariable Long selectedProsecutionId) {
+		logger.info("Starting to calling getITSRecoveryDetailsList method");
+		List<ItsProsecutionsOverpaymentXrefVO> list = null;
+		try {
+			if (selectedProsecutionId != null) {
+				list = prosecutionService.getITSProsecutionDetailsList(selectedProsecutionId);
+			}
+		} catch (BusinessException be) {
+			logger.error("Business Exception in RecoveryController.getITSProsecutionDetailsList() method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSProsecutionDetailsList() method." + be.getMessage());
+		}
+		
 		return list;
 	}
 }

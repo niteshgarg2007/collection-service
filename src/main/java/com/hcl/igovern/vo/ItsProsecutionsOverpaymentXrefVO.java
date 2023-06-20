@@ -10,6 +10,8 @@ public class ItsProsecutionsOverpaymentXrefVO {
 	private Long prosOvpXrefId;
 	private Long prosId;
 	private Long ovpId;
+	private Long victimBadActorXrefId;
+	private Double ovpAmount;
 	private Double resiAmt;
 	private String endDt;
 	private String dateCreated;
@@ -24,4 +26,5 @@ public class ItsProsecutionsOverpaymentXrefVO {
 	private String badActorSsn;
 	private String prtyTaxId;
 	private Double ovpBalance;
+	private Long badActorId;
 }

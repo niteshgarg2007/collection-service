@@ -16,6 +16,7 @@ import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
+import com.hcl.igovern.entity.VITSProsecutionListEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.util.DateUtil;
@@ -37,6 +38,11 @@ public class CommonEntityManagerRepository {
 	private static final String ERR_CODE = "ERR_CODE";
 	private static final String AND_ADDED = " and ";
 	private static final DateTimeFormatter DATE_FORMATTER_yyyy_MM_dd = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	private static final String DATE_CREATED_BETWEEN = " CAST(ref.dateCreated AS date) between :frdt and :tdt";
+	private static final String BAD_ACTOR_NAME_LIKE = " ref.badActorName LIKE :badActorName ";
+	private static final String BAD_ACTOR_NAME = "badActorName";
+	private static final String BAD_ACTOR_SSN = "badActorSsn";
+	private static final String BAD_ACTOR_SSN_PARAM = "ref.badActorSsn = :badActorSsn";
 	
 	public List<VITSOverpaidWeeksEO> getProgramCodeDDList(Long victimBadActorXrefId) {
 		List<?> vITSOverpaidWeeksListTemp = null;
@@ -125,24 +131,24 @@ public class CommonEntityManagerRepository {
 		try {
 			sql.append("SELECT ref from VITSOvpSummaryEO ref where ");
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
-				sql.append("ref.badActorSsn = :badActorSsn");
+				sql.append(BAD_ACTOR_SSN_PARAM);
 				andQuery = true;
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
 				if (andQuery)
 					sql.append(AND_ADDED);
-				sql.append(" CAST(ref.dateCreated AS date) between :frdt and :tdt");
+				sql.append(DATE_CREATED_BETWEEN);
 				andQuery = true;
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
 				if (andQuery)
 					sql.append(AND_ADDED);
-				sql.append(" ref.badActorName LIKE :badActorName ");
+				sql.append(BAD_ACTOR_NAME_LIKE);
 			}
 			
 			query = entityManager.createQuery(sql.toString(), VITSOvpSummaryEO.class);
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
-				query.setParameter("badActorSsn", StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
+				query.setParameter(BAD_ACTOR_SSN, StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
 				query.setParameter("frdt", DateUtil.parseDateTime(searchBadActorDataVO.getFromDt(),
@@ -151,7 +157,7 @@ public class CommonEntityManagerRepository {
 						DateUtil.parseDateTime(searchBadActorDataVO.getToDt(), DATE_FORMATTER_yyyy_MM_dd));
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
-				query.setParameter("badActorName", "%"+searchBadActorDataVO.getBadActorName()+"%");
+				query.setParameter(BAD_ACTOR_NAME, "%"+searchBadActorDataVO.getBadActorName()+"%");
 			}
 			
 		} catch (Exception e) {
@@ -168,24 +174,24 @@ public class CommonEntityManagerRepository {
 		try {
 			sql.append("SELECT ref from VITSRecoverySummaryEO ref where ");
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
-				sql.append("ref.badActorSsn = :badActorSsn");
+				sql.append(BAD_ACTOR_SSN_PARAM);
 				andQuery = true;
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
 				if (andQuery)
 					sql.append(AND_ADDED);
-				sql.append(" CAST(ref.dateCreated AS date) between :frdt and :tdt");
+				sql.append(DATE_CREATED_BETWEEN);
 				andQuery = true;
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
 				if (andQuery)
 					sql.append(AND_ADDED);
-				sql.append(" ref.badActorName LIKE :badActorName ");
+				sql.append(BAD_ACTOR_NAME_LIKE);
 			}
 			
 			query = entityManager.createQuery(sql.toString(), VITSRecoverySummaryEO.class);
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
-				query.setParameter("badActorSsn", StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
+				query.setParameter(BAD_ACTOR_SSN, StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
 				query.setParameter("frdt", DateUtil.parseDateTime(searchBadActorDataVO.getFromDt(),
@@ -194,7 +200,7 @@ public class CommonEntityManagerRepository {
 						DateUtil.parseDateTime(searchBadActorDataVO.getToDt(), DATE_FORMATTER_yyyy_MM_dd));
 			}
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
-				query.setParameter("badActorName", "%"+searchBadActorDataVO.getBadActorName()+"%");
+				query.setParameter(BAD_ACTOR_NAME, "%"+searchBadActorDataVO.getBadActorName()+"%");
 			}
 			
 		} catch (Exception e) {
@@ -394,5 +400,48 @@ public class CommonEntityManagerRepository {
 			logger.error("Exception in CommonEntityManagerRepository while calling setITSProsOvpXrefNext method");
 			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling setITSProsOvpXrefNext method" +e.getMessage());
 		}
+	}
+
+	public List<VITSProsecutionListEO> getProsSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
+		StringBuilder sql = new StringBuilder();
+		TypedQuery<VITSProsecutionListEO> query = null;
+		boolean andQuery = false;
+		try {
+			sql.append("SELECT ref from VITSProsecutionListEO ref where ");
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
+				sql.append(BAD_ACTOR_SSN_PARAM);
+				andQuery = true;
+			}
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
+				if (andQuery)
+					sql.append(AND_ADDED);
+				sql.append(DATE_CREATED_BETWEEN);
+				andQuery = true;
+			}
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
+				if (andQuery)
+					sql.append(AND_ADDED);
+				sql.append(BAD_ACTOR_NAME_LIKE);
+			}
+			
+			query = entityManager.createQuery(sql.toString(), VITSProsecutionListEO.class);
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
+				query.setParameter(BAD_ACTOR_SSN, StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
+			}
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getFromDt()) && StringUtils.isNotBlank(searchBadActorDataVO.getToDt())) {
+				query.setParameter("frdt", DateUtil.parseDateTime(searchBadActorDataVO.getFromDt(),
+						DATE_FORMATTER_yyyy_MM_dd));
+				query.setParameter("tdt",
+						DateUtil.parseDateTime(searchBadActorDataVO.getToDt(), DATE_FORMATTER_yyyy_MM_dd));
+			}
+			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorName())) {
+				query.setParameter(BAD_ACTOR_NAME, "%"+searchBadActorDataVO.getBadActorName()+"%");
+			}
+			
+		} catch (Exception e) {
+			logger.error("Exception in CommonEntityManagerRepository while calling getProsSearchBadActorData method");
+			throw new BusinessException(ERR_CODE, "Exception in CommonEntityManagerRepository while calling getProsSearchBadActorData method" +e.getMessage());
+		}
+		return query.getResultList();
 	}
 }
