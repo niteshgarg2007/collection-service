@@ -21,7 +21,6 @@ import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
 import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
-import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 import com.hcl.igovern.vo.SearchBadActorDataVO;
@@ -168,23 +167,6 @@ public class RecoveryController {
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.processSelectedRecovery() method." + be.getMessage());
 		}
 		return itsRecoveryVO;
-	}
-	
-	@Operation(summary = "Retrieve refunds list for the bad actor.")
-	@GetMapping("/itsrefundslist/{badActorId}")
-	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable Long badActorId) {
-		logger.info("Starting to calling getITSRefundsListList method");
-		List<ITSRefundsDataVO> list = null;
-		try {
-			if (badActorId != null) {
-				list = recoveryService.getITSRefundsListList(badActorId);
-			}
-		} catch (BusinessException be) {
-			logger.error("Business Exception in RecoveryController.getITSRefundsListList() method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryController.getITSRefundsListList() method." + be.getMessage());
-		}
-		
-		return list;
 	}
 	
 	@Operation(summary = "Retrieve bad actor recovery data")

@@ -21,8 +21,6 @@ import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSProsecutionHistoryVO;
 import com.hcl.igovern.vo.ITSProsecutionListVO;
 import com.hcl.igovern.vo.ITSProsecutionSummaryVO;
-import com.hcl.igovern.vo.ITSRecoverySummaryVO;
-import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
 import com.hcl.igovern.vo.ItsProsecutionVO;
 import com.hcl.igovern.vo.ItsProsecutionsOverpaymentXrefVO;
 import com.hcl.igovern.vo.SearchBadActorDataVO;
