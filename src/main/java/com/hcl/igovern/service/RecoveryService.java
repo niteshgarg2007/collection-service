@@ -9,7 +9,6 @@ import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
 import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
-import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 import com.hcl.igovern.vo.SearchBadActorDataVO;
@@ -31,8 +30,6 @@ public interface RecoveryService {
 	List<ItsRecoveryDetailsVO> getOverpaymentUpdateDetailsListByParams(ContextDataVO contextData);
 
 	ItsRecoveryVO processSelectedRecovery(Long recoveryId);
-
-	List<ITSRefundsDataVO> getITSRefundsListList(Long badActorId);
 
 	List<ITSRecoverySummaryVO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO);
 

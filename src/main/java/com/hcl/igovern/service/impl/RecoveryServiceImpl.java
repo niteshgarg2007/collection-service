@@ -31,7 +31,6 @@ import com.hcl.igovern.entity.VITSRecoveryProcessInputEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryUpdateEO;
 import com.hcl.igovern.entity.VITSRecovsearchDetailsEO;
-import com.hcl.igovern.entity.VITSRefundsDataEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.repository.CommonEntityManagerRepository;
 import com.hcl.igovern.repository.ITSRecoveryHistoryRepository;
@@ -48,7 +47,6 @@ import com.hcl.igovern.repository.VITSRecoveryDetailsRepository;
 import com.hcl.igovern.repository.VITSRecoveryProcessInputRepository;
 import com.hcl.igovern.repository.VITSRecoveryUpdateRepository;
 import com.hcl.igovern.repository.VITSRecovsearchDetailsRepository;
-import com.hcl.igovern.repository.VITSRefundsDataRepository;
 import com.hcl.igovern.service.RecoveryService;
 import com.hcl.igovern.util.DateUtil;
 import com.hcl.igovern.util.UIUtil;
@@ -57,7 +55,6 @@ import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
 import com.hcl.igovern.vo.ITSRecoveryUpdateVO;
 import com.hcl.igovern.vo.ITSRecovsearchDetailsVO;
-import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.ItsRecoveryDetailsVO;
 import com.hcl.igovern.vo.ItsRecoveryVO;
 import com.hcl.igovern.vo.SearchBadActorDataVO;
@@ -108,9 +105,6 @@ public class RecoveryServiceImpl implements RecoveryService {
 	
 	@Autowired
 	private VITSOvpSummaryRepository vITSOvpSummaryRepository;
-	
-	@Autowired
-	private VITSRefundsDataRepository vITSRefundsDataRepository;
 	
 	@Autowired
 	private VITSRecovsearchDetailsRepository vITSRecovsearchDetailsRepository;
@@ -746,41 +740,6 @@ public class RecoveryServiceImpl implements RecoveryService {
 		}
 		
 		return itsOverpaymentDetailsEO;
-	}
-
-	@Override
-	public List<ITSRefundsDataVO> getITSRefundsListList(Long badActorId) {
-		List<VITSRefundsDataEO> vITSRefundsDataEOList = null;
-		List<ITSRefundsDataVO> itsRefundsDataVOList = new ArrayList<>();
-		try {
-			vITSRefundsDataEOList = vITSRefundsDataRepository.findByBadActorId(badActorId);
-			if (vITSRefundsDataEOList != null && !vITSRefundsDataEOList.isEmpty()) {
-				for (VITSRefundsDataEO vITSRefundsDataEOObj : vITSRefundsDataEOList) {
-					ITSRefundsDataVO itsRefundsDataVOObj = new ITSRefundsDataVO();
-					BeanUtils.copyProperties(vITSRefundsDataEOObj, itsRefundsDataVOObj);
-					itsRefundsDataVOObj.setRefDspn(getRefundStatusDesc(vITSRefundsDataEOObj));
-					itsRefundsDataVOObj.setDateCreated(DateUtil.convertDateToString(vITSRefundsDataEOObj.getDateCreated()) );
-					itsRefundsDataVOObj.setRefIssuedDate(DateUtil.convertDateToString(vITSRefundsDataEOObj.getRefIssuedDate()));
-					itsRefundsDataVOList.add(itsRefundsDataVOObj);
-				}
-			}
-		} catch (BusinessException e) {
-			logger.error("Business Exception in RecoveryServiceImpl getITSRecoverySummaryList method");
-			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.getITSRecoverySummaryList() method." + e.getMessage());
-		}
-		
-		return itsRefundsDataVOList;
-	}
-
-	private String getRefundStatusDesc(VITSRefundsDataEO vITSRefundsDataEOObj) {
-		String refundStatusDesc = "";
-		if (vITSRefundsDataEOObj.getRefDspn().equalsIgnoreCase("P")) {
-			refundStatusDesc =  "Pending Refund";
-		}
-		if (vITSRefundsDataEOObj.getRefDspn().equalsIgnoreCase("I")) {
-			refundStatusDesc =  "Issued";
-		}
-		return refundStatusDesc;
 	}
 
 	@Override
