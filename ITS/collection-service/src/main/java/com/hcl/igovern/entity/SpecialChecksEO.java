@@ -6,12 +6,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.hcl.igovern.auditing.Auditable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -77,9 +82,13 @@ public class SpecialChecksEO extends Auditable<String> implements Serializable {
 	@Column(name="GLCTRL_SUB_CD")
 	private String glctrlSubCd;
 	
-	@Column(name="CHCK_ID")
-	private Long chckId;
+//	@Column(name="CHCK_ID")
+//	private Long chckId;
 	
 	@Column(name="ITS_REFUND_ID")
 	private Long itsRefundId;
+	
+	@OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	@JoinColumn(name = "CHCK_ID")  
+	private ChecksEO checksEO;
 }

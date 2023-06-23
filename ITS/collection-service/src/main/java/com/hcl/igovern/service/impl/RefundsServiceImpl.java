@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hcl.igovern.entity.ChecksEO;
 import com.hcl.igovern.entity.ItsRefundsEO;
 import com.hcl.igovern.entity.SpecialChecksEO;
 import com.hcl.igovern.entity.VITSBadActorAddressEO;
@@ -150,7 +151,9 @@ public class RefundsServiceImpl implements RefundsService {
 	public SpecialChecksVO confirmSpecialCheck(SpecialChecksVO specialChecksVO) {
 		try {
 			if (specialChecksVO.getSplChckId() == null) {
+				ChecksEO checksEO = createChecksData(specialChecksVO);
 				SpecialChecksEO specialChecksEO = createSpecialChecksData(specialChecksVO);
+				specialChecksEO.setChecksEO(checksEO);
 				specialChecksRepository.save(specialChecksEO);
 				updateIssuedRefunds(specialChecksEO);
 				specialChecksVO.setStatusMessage("Special Check has been initiated for Excess Refund.");
@@ -160,6 +163,19 @@ public class RefundsServiceImpl implements RefundsService {
 			throw new BusinessException(ERR_CODE, "Something went wrong in RefundsServiceImpl.confirmSpecialCheck() method." + e.getMessage());
 		}
 		return specialChecksVO;
+	}
+
+	private ChecksEO createChecksData(SpecialChecksVO specialChecksVO) {
+		ChecksEO checksEO = new ChecksEO();
+		try {
+			checksEO.setChckAmt(specialChecksVO.getChkAmt());
+			// "M" is for manual check
+			checksEO.setPymtTypCd("M");
+		} catch (Exception e) {
+			logger.error("Business Exception in RefundsServiceImpl.createChecksData method");
+			throw new BusinessException(ERR_CODE, "Something went wrong in RefundsServiceImpl.createChecksData() method." + e.getMessage());
+		}
+		return checksEO;
 	}
 
 	private void updateIssuedRefunds(SpecialChecksEO specialChecksEO) {

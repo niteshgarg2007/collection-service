@@ -33,9 +33,6 @@ public class VITSOverpaidWeeksEO implements Serializable {
 	@Column(name="PAYMENT_AMOUNT")
 	private Double paymentAmount;
 	
-	//@Column(name="RECOVERY_AMOUNT")
-	//private Double recoveryAmount;
-	
 	@Column(name="PRGM_CD")
 	private String prgmCd;
 	
