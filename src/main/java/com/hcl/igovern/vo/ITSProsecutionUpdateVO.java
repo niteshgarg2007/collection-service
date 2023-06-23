@@ -2,7 +2,6 @@ package com.hcl.igovern.vo;
 
 import java.sql.Timestamp;
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 

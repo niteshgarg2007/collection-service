@@ -1,7 +1,6 @@
 package com.hcl.igovern.entity;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
