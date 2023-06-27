@@ -81,9 +81,6 @@ public class SpecialChecksEO extends Auditable<String> implements Serializable {
 	@Column(name="GLCTRL_SUB_CD")
 	private String glctrlSubCd;
 	
-//	@Column(name="CHCK_ID")
-//	private Long chckId;
-	
 	@Column(name="ITS_REFUND_ID")
 	private Long itsRefundId;
 	
