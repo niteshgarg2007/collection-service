@@ -156,7 +156,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 			if (itsRecoveryEOOpt.isPresent()) {
 				itsRecoveryEO = itsRecoveryEOOpt.get();
 				itsRecoveryEO.setBadActorId(itsRecoveryVO.getBadActorId());
-				itsRecoveryEO.setRecoveryDate(DateUtil.strDateToTs(itsRecoveryVO.getRecoveryDate()));
+				itsRecoveryEO.setRecoveryDate(DateUtil.parseDateTime(DateUtil.getCurrentDateString()));
 				itsRecoveryEO.setRecoveryStatus(itsRecoveryVO.getRecoveryStatus());
 				itsRecoveryEO.setRecoveryEffDate(DateUtil.strDateHyphenToTs(itsRecoveryVO.getRecoveryEffDate()));
 				itsRecoveryEO.setTotalPaymentAmount(itsRecoveryVO.getTotalPaymentAmount());

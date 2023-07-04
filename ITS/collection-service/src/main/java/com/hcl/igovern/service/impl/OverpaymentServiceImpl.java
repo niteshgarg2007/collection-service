@@ -834,6 +834,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 		if ("FPUC".equalsIgnoreCase(itsOverpaymentVO.getProgCode()) || "LWA".equalsIgnoreCase(itsOverpaymentVO.getProgCode()) 
 				|| "MEUC".equalsIgnoreCase(itsOverpaymentVO.getProgCode())) {
 			itsOvpDetails.setAddCompPrgDtlId(itsOverpaymentVO.getClaimId());
+			itsOvpDetails.setClmId(itsOverpaymentVO.getClaimId());
 		} else {
 			itsOvpDetails.setClmId(itsOverpaymentVO.getClaimId());
 		}
