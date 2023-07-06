@@ -313,7 +313,7 @@ public class CommonEntityManagerRepository {
 			
 			if (val != null && val.length > 0 && val[3] != null && val[3] instanceof BigDecimal) {
 				Double recoveryAmount = Double.valueOf(((BigDecimal) val[3]).doubleValue());
-				prosOvpXrefVO.setRecoveryAmount(recoveryAmount);
+				prosOvpXrefVO.setRecoveryAmount(recoveryAmount * -1);
 			}
 			
 			if (val != null && val.length > 0 && val[4] != null && val[4] instanceof BigDecimal) {

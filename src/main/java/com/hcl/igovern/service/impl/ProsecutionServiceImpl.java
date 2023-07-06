@@ -98,6 +98,7 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 					BeanUtils.copyProperties(vITSProsUpdateEOObj, itsProsUpdateVOObj);
 					itsProsUpdateVOObj.setDateCreated(DateUtil.tsDateToStr(vITSProsUpdateEOObj.getDateCreated()));
 					itsProsUpdateVOObj.setProsOvpXrefId(null);
+					itsProsUpdateVOObj.setRecoveryAmount(itsProsUpdateVOObj.getRecoveryAmount() * -1);
 					return itsProsUpdateVOObj;
 				}).collect(Collectors.toList());
 			}
@@ -120,6 +121,7 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 					BeanUtils.copyProperties(vITSProsUpdateEOObj, itsProsUpdateVOObj);
 					itsProsUpdateVOObj.setDateCreated(DateUtil.tsDateToStr(vITSProsUpdateEOObj.getDateCreated()));
 					itsProsUpdateVOObj.setProsOvpXrefId(null);
+					itsProsUpdateVOObj.setRecoveryAmount(itsProsUpdateVOObj.getRecoveryAmount() * -1);
 					return itsProsUpdateVOObj;
 				}).collect(Collectors.toList());
 			}
@@ -463,7 +465,7 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 							prosOvpXrefVO.setOvpId(vITSOvpSummaryEO.getOvpId());
 							prosOvpXrefVO.setDateCreated(DateUtil.convertDateToString(vITSOvpSummaryEO.getDateCreated()));
 							prosOvpXrefVO.setOvpTotal(vITSOvpSummaryEO.getOvpTotal());
-							prosOvpXrefVO.setRecoveryAmount(vITSOvpSummaryEO.getRecoveryAmount());
+							prosOvpXrefVO.setRecoveryAmount(vITSOvpSummaryEO.getRecoveryAmount() * -1);
 							prosOvpXrefVO.setOvpPenalty(vITSOvpSummaryEO.getOvpPenalty());
 							prosOvpXrefVO.setOvpInterest(vITSOvpSummaryEO.getOvpInterest());
 							prosOvpXrefVO.setOvpCoc(vITSOvpSummaryEO.getOvpCoc());
