@@ -623,6 +623,7 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 					ItsProsecutionsOverpaymentXrefVO prosOvpXrefVO = new ItsProsecutionsOverpaymentXrefVO();
 					BeanUtils.copyProperties(vITSProsOvpxrefEO, prosOvpXrefVO);
 					prosOvpXrefVO.setDateCreated(DateUtil.convertDateToString(vITSProsOvpxrefEO.getDateCreated()));
+					prosOvpXrefVO.setRecoveryAmount(prosOvpXrefVO.getRecoveryAmount() * -1);
 					return prosOvpXrefVO;
 				}).collect(Collectors.toList());
 			}
