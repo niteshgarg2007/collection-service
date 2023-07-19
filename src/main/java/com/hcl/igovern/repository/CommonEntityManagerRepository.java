@@ -17,6 +17,7 @@ import com.hcl.igovern.entity.VITSOverpaidWeeksEO;
 import com.hcl.igovern.entity.VITSOverpaidWeeksUpdateEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.entity.VITSProsecutionListEO;
+import com.hcl.igovern.entity.VITSRecoverySearchEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.util.DateUtil;
@@ -167,12 +168,12 @@ public class CommonEntityManagerRepository {
 		return query.getResultList();
 	}
 
-	public List<VITSRecoverySummaryEO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
+	public List<VITSRecoverySearchEO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
 		StringBuilder sql = new StringBuilder();
-		TypedQuery<VITSRecoverySummaryEO> query = null;
+		TypedQuery<VITSRecoverySearchEO> query = null;
 		boolean andQuery = false;
 		try {
-			sql.append("SELECT ref from VITSRecoverySummaryEO ref where ");
+			sql.append("SELECT ref from VITSRecoverySearchEO ref where ");
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
 				sql.append(BAD_ACTOR_SSN_PARAM);
 				andQuery = true;
@@ -189,7 +190,7 @@ public class CommonEntityManagerRepository {
 				sql.append(BAD_ACTOR_NAME_LIKE);
 			}
 			
-			query = entityManager.createQuery(sql.toString(), VITSRecoverySummaryEO.class);
+			query = entityManager.createQuery(sql.toString(), VITSRecoverySearchEO.class);
 			if (StringUtils.isNotBlank(searchBadActorDataVO.getBadActorSsn())) {
 				query.setParameter(BAD_ACTOR_SSN, StringUtils.replace(searchBadActorDataVO.getBadActorSsn(), "-", ""));
 			}

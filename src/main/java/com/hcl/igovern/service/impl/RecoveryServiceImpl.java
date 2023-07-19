@@ -28,6 +28,7 @@ import com.hcl.igovern.entity.ItsVictimBadActorXrefEO;
 import com.hcl.igovern.entity.PITSRecoveryDstPercentageEO;
 import com.hcl.igovern.entity.VITSOvpSummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryProcessInputEO;
+import com.hcl.igovern.entity.VITSRecoverySearchEO;
 import com.hcl.igovern.entity.VITSRecoverySummaryEO;
 import com.hcl.igovern.entity.VITSRecoveryUpdateEO;
 import com.hcl.igovern.entity.VITSRecovsearchDetailsEO;
@@ -745,7 +746,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 	@Override
 	public List<ITSRecoverySummaryVO> getRecovSearchBadActorData(SearchBadActorDataVO searchBadActorDataVO) {
 
-		List<VITSRecoverySummaryEO> vITSRecoverySummaryEOList = null;
+		List<VITSRecoverySearchEO> vITSRecoverySummaryEOList = null;
 		List<ITSRecoverySummaryVO> itsRecoverySummaryVOList = new ArrayList<>();
 		try {
 			vITSRecoverySummaryEOList = commonEntityManagerRepository.getRecovSearchBadActorData(searchBadActorDataVO);
