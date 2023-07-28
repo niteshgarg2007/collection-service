@@ -114,17 +114,7 @@
 		<dependency>
 		    <groupId>org.springframework.cloud</groupId>
 		    <artifactId>spring-cloud-starter-bootstrap</artifactId>
-		</dependency>
-		<dependency>
-    		<groupId>org.apache.sling</groupId>
-    		<artifactId>org.apache.sling.xss</artifactId>
-    		<version>2.3.8</version>
-    		<scope>provided</scope>
-		</dependency>
-		<dependency>
-  			<groupId>org.springframework.boot</groupId>
-  			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
+		</dependency>		
 	</dependencies>
 	
 	<dependencyManagement>
