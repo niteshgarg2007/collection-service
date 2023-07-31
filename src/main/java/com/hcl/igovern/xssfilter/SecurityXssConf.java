@@ -28,7 +28,7 @@ public class SecurityXssConf {
 				));
 			
 		http.headers(headers -> headers
-				.contentSecurityPolicy("script-src 'self' 'strict-dynamic' 'nonce-rAnd0m123' 'unsafe-inline' ; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'; frame-ancestors 'none' X-Frame-Options: DENY")	
+				.contentSecurityPolicy("script-src 'self' 'strict-dynamic' 'nonce-rAnd0m123' 'unsafe-inline' ; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'; frame-ancestors 'none'; X-Frame-Options: DENY; X-Content-Type-Options: nosniff; Cache-Control: no-cache, no-store, max-age=0, must-revalidate")	
 			);
 		
 		
