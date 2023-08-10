@@ -1,3 +1,3 @@
 spring:
  profiles:
-  active: ${jenkins.profile}
+  active: local
