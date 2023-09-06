@@ -85,15 +85,18 @@ public class RefundsController {
 	@Operation(summary = "Save special check and its related data to database.")
 	@PostMapping("/confirmspecialcheck")
 	public SpecialChecksVO confirmSpecialCheck(@RequestBody SpecialChecksVO specialChecksVO) {
+		SpecialChecksVO specialChecksVOResponse = new SpecialChecksVO();
 		try {
 			specialChecksVO = refundsService.confirmSpecialCheck(specialChecksVO);
 			if (specialChecksVO != null && (specialChecksVO.getStatusMessage() == null || specialChecksVO.getStatusMessage().isEmpty())) {
 				throw new BusinessException(ERR_CODE, "Something went wrong in RefundsController.confirmSpecialCheck() method.");
 			}
+			if (specialChecksVO != null)
+				specialChecksVOResponse.setStatusMessage(specialChecksVO.getStatusMessage());
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.confirmSpecialCheck() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RefundsController.confirmSpecialCheck() method." + be.getMessage());
 		}
-		return specialChecksVO;
+		return specialChecksVOResponse;
 	}
 }
