@@ -115,6 +115,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 	public ItsRecoveryVO addRecoveryAndDetails(ItsRecoveryVO itsRecoveryVO) {
+		ItsRecoveryVO itsRecoveryVOResponse = new ItsRecoveryVO();
 		if (itsRecoveryVO.getItsRecoveryDtlsVO().isEmpty())
 			throw new BusinessException(ERR_CODE, "Please enter recovery details data.");
 		try {
@@ -122,18 +123,22 @@ public class RecoveryServiceImpl implements RecoveryService {
 				ItsRecoveryEO itsRecoveryEO = createRecoveryDetailsData(itsRecoveryVO);
 				itsRecoveryRepository.save(itsRecoveryEO);
 				itsRecoveryVO.setStatusMessage("Recovery has been successfully added.");
+				itsRecoveryVOResponse.setStatusMessage(itsRecoveryVO.getStatusMessage());
+				itsRecoveryVOResponse.setRecoveryId(itsRecoveryEO.getRecoveryId());
 			}
 			
 			if (itsRecoveryVO.getRecoveryId() != null) {
 				ItsRecoveryEO itsRecoveryEO = updateRecoveryDetailsData(itsRecoveryVO);
 				itsRecoveryRepository.save(itsRecoveryEO);
 				itsRecoveryVO.setStatusMessage("Recovery has been successfully updated.");
+				itsRecoveryVOResponse.setStatusMessage(itsRecoveryVO.getStatusMessage());
+				itsRecoveryVOResponse.setRecoveryId(itsRecoveryVO.getRecoveryId());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in RecoveryServiceImpl.addRecoveryAndDetails method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in RecoveryServiceImpl.addRecoveryAndDetails() method." + e.getMessage());
 		}
-		return itsRecoveryVO;
+		return itsRecoveryVOResponse;
 	}
 
 	private ItsRecoveryEO updateRecoveryDetailsData(ItsRecoveryVO itsRecoveryVO) {

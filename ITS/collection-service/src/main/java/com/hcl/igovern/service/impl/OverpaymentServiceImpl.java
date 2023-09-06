@@ -224,6 +224,7 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
 	public ItsOverpaymentVO addOverpaymentAndDetails(ItsOverpaymentVO itsOverpaymentVO) {
+		ItsOverpaymentVO itsOverpaymentVOResponse = new ItsOverpaymentVO();
 		if (itsOverpaymentVO.getItsOverpaymentDtls().isEmpty())
 			throw new BusinessException(ERR_CODE, "Please select at-least one Overpaid Weeks");
 		try {
@@ -236,17 +237,21 @@ public class OverpaymentServiceImpl implements OverpaymentService {
 					itsOverpaymentEO = createOvpDstAndTransData(itsOverpaymentEO);
 				}
 				overpaymentRepository.save(itsOverpaymentEO);
-				itsOverpaymentVO.setStatusMessage("Overpayment has been successfully added.");
+				itsOverpaymentVOResponse.setStatusMessage("Overpayment has been successfully added.");
+				itsOverpaymentVOResponse.setOvpId(itsOverpaymentEO.getOvpId());
 			}
 			
 			if (itsOverpaymentVO.getOvpId() != null) {
 				itsOverpaymentVO = updateOverpaymentAndDetails(itsOverpaymentVO);
+				itsOverpaymentVOResponse.setStatusMessage(itsOverpaymentVO.getStatusMessage());
+				itsOverpaymentVO.setValidationErrorMessage(itsOverpaymentVO.getValidationErrorMessage());
+				itsOverpaymentVOResponse.setOvpId(itsOverpaymentVO.getOvpId());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in OverpaymentServiceImpl.addOverpaymentAndDetails method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in OverpaymentServiceImpl.addOverpaymentAndDetails() method." + e.getMessage());
 		}
-		return itsOverpaymentVO;
+		return itsOverpaymentVOResponse;
 	}
 
 	private ItsOverpaymentVO updateOverpaymentAndDetails(ItsOverpaymentVO itsOverpaymentVO) {

@@ -140,6 +140,7 @@ public class ProsecutionServiceImpl implements ProsecutionService {
 				ItsProsecutionEO itsProsecutionEO = createProsecutionDetailsData(itsProsecutionVO);
 				itsProsecutionRepository.save(itsProsecutionEO);
 				itsProsecutionVO.setStatusMessage("Prosecution has been successfully added.");
+				itsProsecutionVO.setProsId(itsProsecutionEO.getProsId());
 			}
 			
 			if (itsProsecutionVO.getProsId() != null) {

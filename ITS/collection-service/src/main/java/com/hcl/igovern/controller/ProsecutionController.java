@@ -61,6 +61,7 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	@Operation(summary = "Save prosecution and its related data to database.")
 	@PostMapping("/addprosecution")
 	public ItsProsecutionVO addProsecution(@RequestBody ItsProsecutionVO itsProsecutionVO) {
+		ItsProsecutionVO itsProsecutionVOResponse = new ItsProsecutionVO();
 		try {
 			itsProsecutionVO = prosecutionService.addProsecutionAndDetails(itsProsecutionVO);
 			if (itsProsecutionVO != null && (itsProsecutionVO.getStatusMessage() == null || itsProsecutionVO.getStatusMessage().isEmpty())) {
@@ -70,7 +71,12 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 			logger.error("Business Exception in ProsecutionController.addProsecution() method");
 			throw new BusinessException(ERR_CODE, "Something went wrong in ProsecutionController.addProsecution() method." + be.getMessage());
 		}
-		return itsProsecutionVO;
+		if (itsProsecutionVO != null) {
+			itsProsecutionVOResponse.setStatusMessage(itsProsecutionVO.getStatusMessage());
+			itsProsecutionVOResponse.setProsId(itsProsecutionVO.getProsId());
+		}
+		
+		return itsProsecutionVOResponse;
 	}
 	
 	@Operation(summary = "Retrieve prosecution summary list for the victim and bad actor combination.")
