@@ -125,6 +125,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 				itsRecoveryVO.setStatusMessage("Recovery has been successfully added.");
 				itsRecoveryVOResponse.setStatusMessage(itsRecoveryVO.getStatusMessage());
 				itsRecoveryVOResponse.setRecoveryId(itsRecoveryEO.getRecoveryId());
+				itsRecoveryVOResponse.setRecoveryStatus(itsRecoveryEO.getRecoveryStatus());
 			}
 			
 			if (itsRecoveryVO.getRecoveryId() != null) {
@@ -133,6 +134,7 @@ public class RecoveryServiceImpl implements RecoveryService {
 				itsRecoveryVO.setStatusMessage("Recovery has been successfully updated.");
 				itsRecoveryVOResponse.setStatusMessage(itsRecoveryVO.getStatusMessage());
 				itsRecoveryVOResponse.setRecoveryId(itsRecoveryVO.getRecoveryId());
+				itsRecoveryVOResponse.setRecoveryStatus(itsRecoveryEO.getRecoveryStatus());
 			}
 		} catch (Exception e) {
 			logger.error("Business Exception in RecoveryServiceImpl.addRecoveryAndDetails method");
