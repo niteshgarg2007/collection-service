@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.ProsecutionService;
+import com.hcl.igovern.util.ParamValidateUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSProsecutionHistoryVO;
@@ -81,12 +82,13 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution summary list for the victim and bad actor combination.")
 	@GetMapping("/prossummarylist/{victimBadActorXrefId}")
-	public List<ITSProsecutionSummaryVO> getITSProsecutionSummaryList(@PathVariable Long victimBadActorXrefId) {
+	public List<ITSProsecutionSummaryVO> getITSProsecutionSummaryList(@PathVariable String victimBadActorXrefId) {
 		logger.info("Starting to calling getITSProsecutionSummaryList method");
 		List<ITSProsecutionSummaryVO> list = null;
 		try {
-			if (victimBadActorXrefId != null) {
-				list = prosecutionService.getITSProsecutionSummaryList(victimBadActorXrefId);
+			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
+			if (victimBadActorXrefIdLong != null) {
+				list = prosecutionService.getITSProsecutionSummaryList(victimBadActorXrefIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsecutionSummaryList() method");
@@ -98,12 +100,13 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution history list for the selected prosecution id.")
 	@GetMapping("/proshistorylist/{selectedProsId}")
-	public List<ITSProsecutionHistoryVO> getITSProsHistoryList(@PathVariable Long selectedProsId) {
+	public List<ITSProsecutionHistoryVO> getITSProsHistoryList(@PathVariable String selectedProsId) {
 		logger.info("Starting to calling getITSRecoveryHistoryList method");
 		List<ITSProsecutionHistoryVO> list = null;
 		try {
-			if (selectedProsId != null) {
-				list = prosecutionService.getITSProsHistoryList(selectedProsId);
+			Long selectedProsIdLong = ParamValidateUtil.validateLongData(selectedProsId);
+			if (selectedProsIdLong != null) {
+				list = prosecutionService.getITSProsHistoryList(selectedProsIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsHistoryList() method");
@@ -115,12 +118,13 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution data for the given prosecution id.")
 	@GetMapping("/itsprosecutiondata/{selectedProsId}")
-	public ItsProsecutionVO getITSProsDataByProsId(@PathVariable Long selectedProsId ) {
+	public ItsProsecutionVO getITSProsDataByProsId(@PathVariable String selectedProsId ) {
 		logger.info("Starting to calling getITSProsDataByProsId method");
 		ItsProsecutionVO itsProsecutionVO = null;
 		try {
-			if (selectedProsId != null) {
-				itsProsecutionVO = prosecutionService.getITSProsDataByProsId(selectedProsId);
+			Long selectedProsIdLong = ParamValidateUtil.validateLongData(selectedProsId);
+			if (selectedProsIdLong != null) {
+				itsProsecutionVO = prosecutionService.getITSProsDataByProsId(selectedProsIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsDataByProsId() method");
@@ -166,12 +170,13 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution search details list for the selected prosecution id.")
 	@GetMapping("/prosdetailslist/{selectedProsecutionId}")
-	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(@PathVariable Long selectedProsecutionId) {
+	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(@PathVariable String selectedProsecutionId) {
 		logger.info("Starting to calling getITSRecoveryDetailsList method");
 		List<ItsProsecutionsOverpaymentXrefVO> list = null;
 		try {
-			if (selectedProsecutionId != null) {
-				list = prosecutionService.getITSProsecutionDetailsList(selectedProsecutionId);
+			Long selectedProsecutionIdLong = ParamValidateUtil.validateLongData(selectedProsecutionId);
+			if (selectedProsecutionIdLong != null) {
+				list = prosecutionService.getITSProsecutionDetailsList(selectedProsecutionIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSProsecutionDetailsList() method");
