@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.RefundsService;
+import com.hcl.igovern.util.ParamValidateUtil;
 import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.SpecialChecksVO;
 
@@ -35,12 +36,13 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve refunds list for the bad actor.")
 	@GetMapping("/itsrefundslist/{badActorId}")
-	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable Long badActorId) {
+	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable String badActorId) {
 		logger.info("Starting to calling getITSRefundsListList method");
 		List<ITSRefundsDataVO> list = null;
 		try {
-			if (badActorId != null) {
-				list = refundsService.getITSRefundsListList(badActorId);
+			Long badActorIdLong = ParamValidateUtil.validateLongData(badActorId);
+			if (badActorIdLong != null) {
+				list = refundsService.getITSRefundsListList(badActorIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getITSRefundsListList() method");
@@ -52,12 +54,13 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve refunds data for the given refund id.")
 	@GetMapping("/itsrefundsobject/{selectedRefundsId}")
-	public ITSRefundsDataVO getITSRefundInfo(@PathVariable Long selectedRefundsId ) {
+	public ITSRefundsDataVO getITSRefundInfo(@PathVariable String selectedRefundsId ) {
 		logger.info("Starting to calling getITSRefundInfo method");
 		ITSRefundsDataVO itsRefundsDataVO = null;
 		try {
-			if (selectedRefundsId != null) {
-				itsRefundsDataVO = refundsService.getITSRefundInfo(selectedRefundsId);
+			Long selectedRefundsIdLong = ParamValidateUtil.validateLongData(selectedRefundsId);
+			if (selectedRefundsIdLong != null) {
+				itsRefundsDataVO = refundsService.getITSRefundInfo(selectedRefundsIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getITSRefundInfo() method");
@@ -68,12 +71,13 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve bad actor data for the given bad actor id.")
 	@GetMapping("/itsbadactorheaderobject/{badActorId}")
-	public SpecialChecksVO getBadActorInfo(@PathVariable Long badActorId ) {
+	public SpecialChecksVO getBadActorInfo(@PathVariable String badActorId ) {
 		logger.info("Starting to calling getBadActorInfo method");
 		SpecialChecksVO specialChecksVO = null;
 		try {
-			if (badActorId != null) {
-				specialChecksVO = refundsService.getBadActorInfo(badActorId);
+			Long badActorIdLong = ParamValidateUtil.validateLongData(badActorId);
+			if (badActorIdLong != null) {
+				specialChecksVO = refundsService.getBadActorInfo(badActorIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getBadActorInfo() method");

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.RecoveryService;
+import com.hcl.igovern.util.ParamValidateUtil;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
@@ -75,12 +76,13 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery summary list for the victim and bad actor combination.")
 	@GetMapping("/recoverysummarylist/{victimBadActorXrefId}")
-	public List<ITSRecoverySummaryVO> getITSRecoveryDetailsSummaryList(@PathVariable Long victimBadActorXrefId) {
+	public List<ITSRecoverySummaryVO> getITSRecoveryDetailsSummaryList(@PathVariable String victimBadActorXrefId) {
 		logger.info("Starting to calling getITSRecoveryDetailsSummaryList method");
 		List<ITSRecoverySummaryVO> list = null;
 		try {
-			if (victimBadActorXrefId != null) {
-				list = recoveryService.getITSRecoverySummaryList(victimBadActorXrefId);
+			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
+			if (victimBadActorXrefIdLong != null) {
+				list = recoveryService.getITSRecoverySummaryList(victimBadActorXrefIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDetailsSummaryList() method");
@@ -92,12 +94,13 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery history list for the selected recovery id.")
 	@GetMapping("/recoveryhistorylist/{selectedRecoveryId}")
-	public List<ITSRecoveryHistoryVO> getITSRecoveryHistoryList(@PathVariable Long selectedRecoveryId) {
+	public List<ITSRecoveryHistoryVO> getITSRecoveryHistoryList(@PathVariable String selectedRecoveryId) {
 		logger.info("Starting to calling getITSRecoveryHistoryList method");
 		List<ITSRecoveryHistoryVO> list = null;
 		try {
-			if (selectedRecoveryId != null) {
-				list = recoveryService.getITSRecoveryHistoryList(selectedRecoveryId);
+			Long selectedRecoveryIdLong = ParamValidateUtil.validateLongData(selectedRecoveryId);
+			if (selectedRecoveryIdLong != null) {
+				list = recoveryService.getITSRecoveryHistoryList(selectedRecoveryIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryHistoryList() method");
@@ -109,12 +112,13 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery data for the given recovery.")
 	@GetMapping("/itsrecoverydata/{recoveryId}")
-	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(@PathVariable Long recoveryId ) {
+	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(@PathVariable String recoveryId ) {
 		logger.info("Starting to calling getITSRecoveryDataByRecoveryId method");
 		ItsRecoveryVO itsRecoveryVO = null;
 		try {
-			if (recoveryId != null) {
-				itsRecoveryVO = recoveryService.getITSRecoveryDataByRecoveryId(recoveryId);
+			Long recoveryIdLong = ParamValidateUtil.validateLongData(recoveryId);
+			if (recoveryIdLong != null) {
+				itsRecoveryVO = recoveryService.getITSRecoveryDataByRecoveryId(recoveryIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDataByRecoveryId() method");
@@ -153,12 +157,13 @@ public class RecoveryController {
 	
 	@Operation(summary = "process given recovery.")
 	@GetMapping("/processrecovery/{recoveryId}")
-	public ItsRecoveryVO processSelectedRecovery(@PathVariable Long recoveryId ) {
+	public ItsRecoveryVO processSelectedRecovery(@PathVariable String recoveryId ) {
 		logger.info("Starting to calling processSelectedRecovery method");
 		ItsRecoveryVO itsRecoveryVO = null;
 		try {
-			if (recoveryId != null) {
-				itsRecoveryVO = recoveryService.processSelectedRecovery(recoveryId);
+			Long recoveryIdLong = ParamValidateUtil.validateLongData(recoveryId);
+			if (recoveryIdLong != null) {
+				itsRecoveryVO = recoveryService.processSelectedRecovery(recoveryIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.processSelectedRecovery() method");
@@ -176,12 +181,13 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery search details list for the selected recovery id.")
 	@GetMapping("/recoverySearchdetailslist/{selectedRecoveryId}")
-	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(@PathVariable Long selectedRecoveryId) {
+	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(@PathVariable String selectedRecoveryId) {
 		logger.info("Starting to calling getITSRecoveryDetailsList method");
 		List<ITSRecovsearchDetailsVO> list = null;
 		try {
-			if (selectedRecoveryId != null) {
-				list = recoveryService.getITSRecoveryDetailsList(selectedRecoveryId);
+			Long selectedRecoveryIdLong = ParamValidateUtil.validateLongData(selectedRecoveryId);
+			if (selectedRecoveryIdLong != null) {
+				list = recoveryService.getITSRecoveryDetailsList(selectedRecoveryIdLong);
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDetailsList() method");
