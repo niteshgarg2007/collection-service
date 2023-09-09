@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.RecoveryService;
-import com.hcl.igovern.util.ParamValidateUtil;
+import com.hcl.igovern.validation.InputLongConstraint;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSRecoveryHistoryVO;
 import com.hcl.igovern.vo.ITSRecoverySummaryVO;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @RequestMapping("/its/apis/recovery")
 @ResponseBody
+@Validated
 public class RecoveryController {
 
 	Logger logger = LoggerFactory.getLogger(RecoveryController.class);
@@ -76,13 +78,12 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery summary list for the victim and bad actor combination.")
 	@GetMapping("/recoverysummarylist/{victimBadActorXrefId}")
-	public List<ITSRecoverySummaryVO> getITSRecoveryDetailsSummaryList(@PathVariable String victimBadActorXrefId) {
+	public List<ITSRecoverySummaryVO> getITSRecoveryDetailsSummaryList(@PathVariable @InputLongConstraint String victimBadActorXrefId) {
 		logger.info("Starting to calling getITSRecoveryDetailsSummaryList method");
 		List<ITSRecoverySummaryVO> list = null;
 		try {
-			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
-			if (victimBadActorXrefIdLong != null) {
-				list = recoveryService.getITSRecoverySummaryList(victimBadActorXrefIdLong);
+			if (victimBadActorXrefId != null) {
+				list = recoveryService.getITSRecoverySummaryList(Long.valueOf(victimBadActorXrefId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDetailsSummaryList() method");
@@ -94,13 +95,12 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery history list for the selected recovery id.")
 	@GetMapping("/recoveryhistorylist/{selectedRecoveryId}")
-	public List<ITSRecoveryHistoryVO> getITSRecoveryHistoryList(@PathVariable String selectedRecoveryId) {
+	public List<ITSRecoveryHistoryVO> getITSRecoveryHistoryList(@PathVariable @InputLongConstraint String selectedRecoveryId) {
 		logger.info("Starting to calling getITSRecoveryHistoryList method");
 		List<ITSRecoveryHistoryVO> list = null;
 		try {
-			Long selectedRecoveryIdLong = ParamValidateUtil.validateLongData(selectedRecoveryId);
-			if (selectedRecoveryIdLong != null) {
-				list = recoveryService.getITSRecoveryHistoryList(selectedRecoveryIdLong);
+			if (selectedRecoveryId != null) {
+				list = recoveryService.getITSRecoveryHistoryList(Long.valueOf(selectedRecoveryId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryHistoryList() method");
@@ -112,13 +112,12 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery data for the given recovery.")
 	@GetMapping("/itsrecoverydata/{recoveryId}")
-	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(@PathVariable String recoveryId ) {
+	public ItsRecoveryVO getITSRecoveryDataByRecoveryId(@PathVariable @InputLongConstraint String recoveryId ) {
 		logger.info("Starting to calling getITSRecoveryDataByRecoveryId method");
 		ItsRecoveryVO itsRecoveryVO = null;
 		try {
-			Long recoveryIdLong = ParamValidateUtil.validateLongData(recoveryId);
-			if (recoveryIdLong != null) {
-				itsRecoveryVO = recoveryService.getITSRecoveryDataByRecoveryId(recoveryIdLong);
+			if (recoveryId != null) {
+				itsRecoveryVO = recoveryService.getITSRecoveryDataByRecoveryId(Long.valueOf(recoveryId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDataByRecoveryId() method");
@@ -157,13 +156,12 @@ public class RecoveryController {
 	
 	@Operation(summary = "process given recovery.")
 	@GetMapping("/processrecovery/{recoveryId}")
-	public ItsRecoveryVO processSelectedRecovery(@PathVariable String recoveryId ) {
+	public ItsRecoveryVO processSelectedRecovery(@PathVariable @InputLongConstraint String recoveryId ) {
 		logger.info("Starting to calling processSelectedRecovery method");
 		ItsRecoveryVO itsRecoveryVO = null;
 		try {
-			Long recoveryIdLong = ParamValidateUtil.validateLongData(recoveryId);
-			if (recoveryIdLong != null) {
-				itsRecoveryVO = recoveryService.processSelectedRecovery(recoveryIdLong);
+			if (recoveryId != null) {
+				itsRecoveryVO = recoveryService.processSelectedRecovery(Long.valueOf(recoveryId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.processSelectedRecovery() method");
@@ -181,13 +179,12 @@ public class RecoveryController {
 	
 	@Operation(summary = "Retrieve recovery search details list for the selected recovery id.")
 	@GetMapping("/recoverySearchdetailslist/{selectedRecoveryId}")
-	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(@PathVariable String selectedRecoveryId) {
+	public List<ITSRecovsearchDetailsVO> getITSRecoveryDetailsList(@PathVariable @InputLongConstraint String selectedRecoveryId) {
 		logger.info("Starting to calling getITSRecoveryDetailsList method");
 		List<ITSRecovsearchDetailsVO> list = null;
 		try {
-			Long selectedRecoveryIdLong = ParamValidateUtil.validateLongData(selectedRecoveryId);
-			if (selectedRecoveryIdLong != null) {
-				list = recoveryService.getITSRecoveryDetailsList(selectedRecoveryIdLong);
+			if (selectedRecoveryId != null) {
+				list = recoveryService.getITSRecoveryDetailsList(Long.valueOf(selectedRecoveryId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSRecoveryDetailsList() method");

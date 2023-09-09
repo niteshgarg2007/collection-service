@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.ProsecutionService;
-import com.hcl.igovern.util.ParamValidateUtil;
+import com.hcl.igovern.validation.InputLongConstraint;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSProsecutionHistoryVO;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @RequestMapping("/its/apis/prosecution")
 @ResponseBody
+@Validated
 public class ProsecutionController {
 
 Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
@@ -82,13 +84,12 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution summary list for the victim and bad actor combination.")
 	@GetMapping("/prossummarylist/{victimBadActorXrefId}")
-	public List<ITSProsecutionSummaryVO> getITSProsecutionSummaryList(@PathVariable String victimBadActorXrefId) {
+	public List<ITSProsecutionSummaryVO> getITSProsecutionSummaryList(@PathVariable @InputLongConstraint String victimBadActorXrefId) {
 		logger.info("Starting to calling getITSProsecutionSummaryList method");
 		List<ITSProsecutionSummaryVO> list = null;
 		try {
-			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
-			if (victimBadActorXrefIdLong != null) {
-				list = prosecutionService.getITSProsecutionSummaryList(victimBadActorXrefIdLong);
+			if (victimBadActorXrefId != null) {
+				list = prosecutionService.getITSProsecutionSummaryList(Long.valueOf(victimBadActorXrefId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsecutionSummaryList() method");
@@ -100,13 +101,12 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution history list for the selected prosecution id.")
 	@GetMapping("/proshistorylist/{selectedProsId}")
-	public List<ITSProsecutionHistoryVO> getITSProsHistoryList(@PathVariable String selectedProsId) {
+	public List<ITSProsecutionHistoryVO> getITSProsHistoryList(@PathVariable @InputLongConstraint String selectedProsId) {
 		logger.info("Starting to calling getITSRecoveryHistoryList method");
 		List<ITSProsecutionHistoryVO> list = null;
 		try {
-			Long selectedProsIdLong = ParamValidateUtil.validateLongData(selectedProsId);
-			if (selectedProsIdLong != null) {
-				list = prosecutionService.getITSProsHistoryList(selectedProsIdLong);
+			if (selectedProsId != null) {
+				list = prosecutionService.getITSProsHistoryList(Long.valueOf(selectedProsId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsHistoryList() method");
@@ -118,13 +118,12 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution data for the given prosecution id.")
 	@GetMapping("/itsprosecutiondata/{selectedProsId}")
-	public ItsProsecutionVO getITSProsDataByProsId(@PathVariable String selectedProsId ) {
+	public ItsProsecutionVO getITSProsDataByProsId(@PathVariable @InputLongConstraint String selectedProsId ) {
 		logger.info("Starting to calling getITSProsDataByProsId method");
 		ItsProsecutionVO itsProsecutionVO = null;
 		try {
-			Long selectedProsIdLong = ParamValidateUtil.validateLongData(selectedProsId);
-			if (selectedProsIdLong != null) {
-				itsProsecutionVO = prosecutionService.getITSProsDataByProsId(selectedProsIdLong);
+			if (selectedProsId != null) {
+				itsProsecutionVO = prosecutionService.getITSProsDataByProsId(Long.valueOf(selectedProsId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in ProsecutionController.getITSProsDataByProsId() method");
@@ -170,13 +169,12 @@ Logger logger = LoggerFactory.getLogger(ProsecutionController.class);
 	
 	@Operation(summary = "Retrieve prosecution search details list for the selected prosecution id.")
 	@GetMapping("/prosdetailslist/{selectedProsecutionId}")
-	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(@PathVariable String selectedProsecutionId) {
+	public List<ItsProsecutionsOverpaymentXrefVO> getITSProsecutionDetailsList(@PathVariable @InputLongConstraint String selectedProsecutionId) {
 		logger.info("Starting to calling getITSRecoveryDetailsList method");
 		List<ItsProsecutionsOverpaymentXrefVO> list = null;
 		try {
-			Long selectedProsecutionIdLong = ParamValidateUtil.validateLongData(selectedProsecutionId);
-			if (selectedProsecutionIdLong != null) {
-				list = prosecutionService.getITSProsecutionDetailsList(selectedProsecutionIdLong);
+			if (selectedProsecutionId != null) {
+				list = prosecutionService.getITSProsecutionDetailsList(Long.valueOf(selectedProsecutionId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RecoveryController.getITSProsecutionDetailsList() method");
