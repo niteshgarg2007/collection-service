@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.RefundsService;
-import com.hcl.igovern.util.ParamValidateUtil;
+import com.hcl.igovern.validation.InputLongConstraint;
 import com.hcl.igovern.vo.ITSRefundsDataVO;
 import com.hcl.igovern.vo.SpecialChecksVO;
 
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @RequestMapping("/its/apis/refunds")
 @ResponseBody
+@Validated
 public class RefundsController {
 	
 	Logger logger = LoggerFactory.getLogger(RefundsController.class);
@@ -36,13 +38,12 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve refunds list for the bad actor.")
 	@GetMapping("/itsrefundslist/{badActorId}")
-	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable String badActorId) {
+	public List<ITSRefundsDataVO> getITSRefundsListList(@PathVariable @InputLongConstraint String badActorId) {
 		logger.info("Starting to calling getITSRefundsListList method");
 		List<ITSRefundsDataVO> list = null;
 		try {
-			Long badActorIdLong = ParamValidateUtil.validateLongData(badActorId);
-			if (badActorIdLong != null) {
-				list = refundsService.getITSRefundsListList(badActorIdLong);
+			if (badActorId != null) {
+				list = refundsService.getITSRefundsListList(Long.valueOf(badActorId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getITSRefundsListList() method");
@@ -54,13 +55,12 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve refunds data for the given refund id.")
 	@GetMapping("/itsrefundsobject/{selectedRefundsId}")
-	public ITSRefundsDataVO getITSRefundInfo(@PathVariable String selectedRefundsId ) {
+	public ITSRefundsDataVO getITSRefundInfo(@PathVariable @InputLongConstraint String selectedRefundsId ) {
 		logger.info("Starting to calling getITSRefundInfo method");
 		ITSRefundsDataVO itsRefundsDataVO = null;
 		try {
-			Long selectedRefundsIdLong = ParamValidateUtil.validateLongData(selectedRefundsId);
-			if (selectedRefundsIdLong != null) {
-				itsRefundsDataVO = refundsService.getITSRefundInfo(selectedRefundsIdLong);
+			if (selectedRefundsId != null) {
+				itsRefundsDataVO = refundsService.getITSRefundInfo(Long.valueOf(selectedRefundsId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getITSRefundInfo() method");
@@ -71,13 +71,12 @@ public class RefundsController {
 	
 	@Operation(summary = "Retrieve bad actor data for the given bad actor id.")
 	@GetMapping("/itsbadactorheaderobject/{badActorId}")
-	public SpecialChecksVO getBadActorInfo(@PathVariable String badActorId ) {
+	public SpecialChecksVO getBadActorInfo(@PathVariable @InputLongConstraint String badActorId ) {
 		logger.info("Starting to calling getBadActorInfo method");
 		SpecialChecksVO specialChecksVO = null;
 		try {
-			Long badActorIdLong = ParamValidateUtil.validateLongData(badActorId);
-			if (badActorIdLong != null) {
-				specialChecksVO = refundsService.getBadActorInfo(badActorIdLong);
+			if (badActorId != null) {
+				specialChecksVO = refundsService.getBadActorInfo(Long.valueOf(badActorId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in RefundsController.getBadActorInfo() method");

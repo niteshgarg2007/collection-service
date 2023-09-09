@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hcl.igovern.exception.BusinessException;
 import com.hcl.igovern.service.OverpaymentService;
-import com.hcl.igovern.util.ParamValidateUtil;
+import com.hcl.igovern.validation.InputLongConstraint;
 import com.hcl.igovern.vo.ContextDataVO;
 import com.hcl.igovern.vo.ITSOvpSummaryVO;
 import com.hcl.igovern.vo.ITSOvpsearchDetailsVO;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @RequestMapping("/its/apis/overpayment")
 @ResponseBody
+@Validated
 public class OverpaymentController {
 	
 	Logger logger = LoggerFactory.getLogger(OverpaymentController.class);
@@ -51,13 +53,12 @@ public class OverpaymentController {
 	
 	@Operation(summary = "Retrieve available program for the victim and bad actor combination.")
 	@GetMapping("/programcodelist/{victimBadActorXrefId}")
-	public List<OverpaidWeeksVO> getProgramCodeDDList(@PathVariable String victimBadActorXrefId ) {
+	public List<OverpaidWeeksVO> getProgramCodeDDList(@PathVariable @InputLongConstraint String victimBadActorXrefId ) {
 		logger.info("Starting to calling getProgramCodeDDList method");
 		List<OverpaidWeeksVO> list = null;
 		try {
-			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
-			if (victimBadActorXrefIdLong != null) {
-				list = overpaymentService.getProgramCodeDDList(victimBadActorXrefIdLong);
+			if (victimBadActorXrefId != null) {
+				list = overpaymentService.getProgramCodeDDList(Long.valueOf(victimBadActorXrefId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getProgramCodeDDList() method");
@@ -84,13 +85,12 @@ public class OverpaymentController {
 	
 	@Operation(summary = "Retrieve overpayment summary list for the victim and bad actor combination.")
 	@GetMapping("/overpaymentsummarylist/{victimBadActorXrefId}")
-	public List<ITSOvpSummaryVO> getITSOverpaymentSummaryList(@PathVariable String victimBadActorXrefId) {
+	public List<ITSOvpSummaryVO> getITSOverpaymentSummaryList(@PathVariable @InputLongConstraint String victimBadActorXrefId) {
 		logger.info("Starting to calling getITSOverpaymentSummaryList method");
 		List<ITSOvpSummaryVO> list = null;
 		try {
-			Long victimBadActorXrefIdLong = ParamValidateUtil.validateLongData(victimBadActorXrefId);
-			if (victimBadActorXrefIdLong != null) {
-				list = overpaymentService.getITSOverpaymentSummaryList(victimBadActorXrefIdLong);
+			if (victimBadActorXrefId != null) {
+				list = overpaymentService.getITSOverpaymentSummaryList(Long.valueOf(victimBadActorXrefId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getITSOverpaymentSummaryList() method");
@@ -102,13 +102,12 @@ public class OverpaymentController {
 	
 	@Operation(summary = "Retrieve overpayment details for the given overpayment.")
 	@GetMapping("/overpaymentandovpdetails/{overpaymentId}")
-	public ItsOverpaymentVO getITSOverpaymentAndOvpDetails(@PathVariable String overpaymentId ) {
+	public ItsOverpaymentVO getITSOverpaymentAndOvpDetails(@PathVariable @InputLongConstraint String overpaymentId ) {
 		logger.info("Starting to calling getITSOverpaymentAndOvpDetails method");
 		ItsOverpaymentVO itsOverpaymentVO = null;
 		try {
-			Long overpaymentIdLong = ParamValidateUtil.validateLongData(overpaymentId);
-			if (overpaymentIdLong != null) {
-				itsOverpaymentVO = overpaymentService.getITSOverpaymentAndOvpDetails(overpaymentIdLong);
+			if (overpaymentId != null) {
+				itsOverpaymentVO = overpaymentService.getITSOverpaymentAndOvpDetails(Long.valueOf(overpaymentId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController getITSOverpaymentAndOvpDetails() method");
@@ -167,13 +166,12 @@ public class OverpaymentController {
 	
 	@Operation(summary = "Retrieve overpayment status history list for the selected overpayment id.")
 	@GetMapping("/overpaymentstatushistorylist/{selectedOverpaymentId}")
-	public List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(@PathVariable String selectedOverpaymentId) {
+	public List<ITSOvpSummaryVO> getITSOverpaymentStatusHistoryList(@PathVariable @InputLongConstraint String selectedOverpaymentId) {
 		logger.info("Starting to calling getITSOverpaymentStatusHistoryList method");
 		List<ITSOvpSummaryVO> list = null;
 		try {
-			Long selectedOverpaymentIdLong = ParamValidateUtil.validateLongData(selectedOverpaymentId);
-			if (selectedOverpaymentIdLong != null) {
-				list = overpaymentService.getITSOverpaymentStatusHistoryList(selectedOverpaymentIdLong);
+			if (selectedOverpaymentId != null) {
+				list = overpaymentService.getITSOverpaymentStatusHistoryList(Long.valueOf(selectedOverpaymentId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController.getITSOverpaymentStatusHistoryList() method");
@@ -192,13 +190,12 @@ public class OverpaymentController {
 	
 	@Operation(summary = "Retrieve overpayment search details list for the selected overpayment id.")
 	@GetMapping("/overpaymentdetailslist/{selectedOverpaymentId}")
-	public List<ITSOvpsearchDetailsVO> getITSOverpaymentDetailsList(@PathVariable String selectedOverpaymentId) {
+	public List<ITSOvpsearchDetailsVO> getITSOverpaymentDetailsList(@PathVariable @InputLongConstraint String selectedOverpaymentId) {
 		logger.info("Starting to calling getITSOverpaymentDetailsList method");
 		List<ITSOvpsearchDetailsVO> list = null;
 		try {
-			Long selectedOverpaymentIdLong = ParamValidateUtil.validateLongData(selectedOverpaymentId);
-			if (selectedOverpaymentIdLong != null) {
-				list = overpaymentService.getITSOverpaymentDetailsList(selectedOverpaymentIdLong);
+			if (selectedOverpaymentId != null) {
+				list = overpaymentService.getITSOverpaymentDetailsList(Long.valueOf(selectedOverpaymentId));
 			}
 		} catch (BusinessException be) {
 			logger.error("Business Exception in OverpaymentController.getITSOverpaymentDetailsList() method");
